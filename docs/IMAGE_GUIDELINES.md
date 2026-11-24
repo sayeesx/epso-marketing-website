@@ -7,11 +7,14 @@ Epso's brand assets are managed in `public/assets/`. Placeholder SVGs are used u
 ## Asset directory structure
 
 ```
-public/assets/
-├── branding/
-│   ├── logo-placeholder.svg     ← Replace with official Epso logo
-│   ├── logo-dark-placeholder.svg ← Replace with logo variant for light backgrounds
-│   └── favicon.svg              ← Replace with official favicon
+public/
+├── logo.png                     ← Official Epso logo
+└── assets/
+    ├── branding/
+    │   ├── logo.png             ← Official Epso logo copy
+    │   ├── logo-placeholder.svg     ← Fallback placeholder
+    │   ├── logo-dark-placeholder.svg ← Variant for dark backgrounds
+    │   └── favicon.svg              ← Favicon mark
 ├── products/
 │   └── product-placeholder.svg  ← Used as fallback when product has no image
 ├── categories/
