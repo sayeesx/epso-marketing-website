@@ -1,0 +1,39 @@
+---
+import type { BreadcrumbItem } from '../../types/index';
+
+interface Props {
+  items: BreadcrumbItem[];
+}
+const { items } = Astro.props;
+
+const siteUrl = import.meta.env.SITE_URL || 'https://epso.in';
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: items.map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: item.label,
+    item: item.href.startsWith('http') ? item.href : `${siteUrl}${item.href}`,
+  })),
+};
+---
+<nav aria-label="Breadcrumb" class="mb-4">
+  <ol class="flex flex-wrap items-center gap-1.5 text-sm">
+    {items.map((item, index) => (
+      <li class="flex items-center gap-1.5">
+        {index < items.length - 1 ? (
+          <>
+            <a href={item.href} class="breadcrumb-item hover:underline">{item.label}</a>
+            <span class="text-brand-300" aria-hidden="true">/</span>
+          </>
+        ) : (
+          <span class="text-brand-700 font-medium" aria-current="page">{item.label}</span>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />
+

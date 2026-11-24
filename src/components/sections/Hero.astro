@@ -1,0 +1,47 @@
+---
+interface Props {
+  heading?: string;
+  subheading?: string;
+  primaryCta?: { label: string; href: string };
+  secondaryCta?: { label: string; href: string };
+  imageSrc?: string;
+  imageAlt?: string;
+}
+const {
+  heading = 'Good products for every home.',
+  subheading = 'Epso makes everyday food and home care products for Indian households.',
+  primaryCta = { label: 'Explore products', href: '/products/' },
+  secondaryCta = { label: 'About Epso', href: '/about/' },
+  imageSrc = '/assets/banners/hero-placeholder.svg',
+  imageAlt = 'Epso products',
+} = Astro.props;
+---
+<section class="relative overflow-hidden bg-brand-50">
+  <div class="container-site">
+    <div class="grid grid-cols-1 items-center gap-8 py-12 md:grid-cols-2 md:py-16 lg:py-20">
+      <!-- Text content -->
+      <div class="max-w-lg">
+        <h1 class="mb-4 text-brand-800">{heading}</h1>
+        <p class="mb-8 text-lg text-brand-500 leading-relaxed">{subheading}</p>
+        <div class="flex flex-col gap-3 sm:flex-row">
+          <a href={primaryCta.href} class="btn-primary text-base">{primaryCta.label}</a>
+          <a href={secondaryCta.href} class="btn-secondary text-base">{secondaryCta.label}</a>
+        </div>
+      </div>
+      <!-- Hero image -->
+      <div class="relative">
+        <img
+          src={imageSrc}
+          alt={imageAlt}
+          width="640"
+          height="480"
+          loading="eager"
+          fetchpriority="high"
+          decoding="sync"
+          class="w-full rounded-xl object-cover shadow-sm"
+        />
+      </div>
+    </div>
+  </div>
+</section>
+

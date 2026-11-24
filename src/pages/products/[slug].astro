@@ -1,0 +1,213 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/seo/Breadcrumbs.astro';
+import SanityImage from '../../components/ui/SanityImage.astro';
+import ProductCard from '../../components/ui/ProductCard.astro';
+import ContactCta from '../../components/sections/ContactCta.astro';
+import { sanityClient, sanityImageUrl } from '../../lib/sanity';
+import { getProductBySlugQuery, getAllProductSlugsQuery } from '../../lib/queries';
+import type { Product } from '../../types/index';
+
+export async function getStaticPaths() {
+  try {
+    const slugs = await sanityClient.fetch(getAllProductSlugsQuery);
+    return (slugs as { slug: string }[]).map((s) => ({ params: { slug: s.slug } }));
+  } catch {
+    return [];
+  }
+}
+
+const { slug } = Astro.params;
+let product: Product | null = null;
+
+try {
+  product = await sanityClient.fetch(getProductBySlugQuery, { slug });
+} catch {
+  // Could not fetch product
+}
+
+if (!product) {
+  return Astro.redirect('/404');
+}
+
+const catSlug =
+  typeof product.category?.slug === 'string'
+    ? product.category.slug
+    : product.category?.slug?.current;
+
+const parentSlug =
+  typeof product.category?.parent?.slug === 'string'
+    ? product.category.parent.slug
+    : product.category?.parent?.slug?.current;
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Products', href: '/products/' },
+  ...(product.category?.parent && parentSlug
+    ? [{ label: product.category.parent.name, href: `/category/${parentSlug}/` }]
+    : []),
+  ...(product.category && catSlug
+    ? [{ label: product.category.name, href: `/category/${catSlug}/` }]
+    : []),
+  { label: product.name, href: `/products/${slug}/` },
+];
+
+const siteUrl = import.meta.env.SITE_URL || 'https://epso.in';
+const productImageUrl = product.mainImage?.asset?._ref
+  ? sanityImageUrl(product.mainImage, { width: 800, height: 800 })
+  : `${siteUrl}/assets/products/product-placeholder.svg`;
+
+const productSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: product.name,
+  description: product.shortDescription || product.seo?.description || '',
+  image: productImageUrl,
+  brand: {
+    '@type': 'Brand',
+    name: 'Epso',
+  },
+  offers: {
+    '@type': 'Offer',
+    availability: 'https://schema.org/InStock',
+    seller: {
+      '@type': 'Organization',
+      name: 'Epso',
+    },
+  },
+};
+---
+<BaseLayout
+  title={product.seo?.title || product.name}
+  description={product.seo?.description || product.shortDescription || `${product.name} by Epso.`}
+  image={productImageUrl}
+  type="product"
+  structuredData={productSchema}
+>
+  <div class="section-pad">
+    <div class="container-site">
+      <Breadcrumbs items={breadcrumbs} />
+
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-12">
+        <!-- Product images -->
+        <div>
+          <div class="aspect-square overflow-hidden rounded-xl border border-brand-100 bg-brand-50">
+            <SanityImage
+              image={product.mainImage}
+              alt={product.mainImage?.alt || product.name}
+              width={600}
+              height={600}
+              loading="eager"
+              fetchpriority="high"
+              class="h-full w-full object-cover"
+            />
+          </div>
+          {product.images && product.images.length > 0 && (
+            <div class="mt-3 grid grid-cols-4 gap-2">
+              {product.images.slice(0, 4).map((img) => (
+                <div class="aspect-square overflow-hidden rounded-lg border border-brand-100 bg-brand-50">
+                  <SanityImage
+                    image={img}
+                    alt={img.alt || product!.name}
+                    width={150}
+                    height={150}
+                    class="h-full w-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <!-- Product info -->
+        <div>
+          {product.category && catSlug && (
+            <a
+              href={`/category/${catSlug}/`}
+              class="mb-2 inline-block text-sm font-medium text-accent-600 hover:text-accent-700"
+            >
+              {product.category.name}
+            </a>
+          )}
+          <h1 class="mb-3 text-brand-800">{product.name}</h1>
+          {product.shortDescription && (
+            <p class="mb-4 text-lg text-brand-500">{product.shortDescription}</p>
+          )}
+
+          <!-- Packaging sizes -->
+          {product.packagingSizes && product.packagingSizes.length > 0 && (
+            <div class="mb-5">
+              <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-brand-600">
+                Available sizes
+              </h2>
+              <div class="flex flex-wrap gap-2">
+                {product.packagingSizes.map((size) => (
+                  <span class="rounded-full border border-brand-200 px-3 py-1 text-sm font-medium text-brand-700">
+                    {size.size} {size.unit}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <!-- Features -->
+          {product.features && product.features.length > 0 && (
+            <div class="mb-5">
+              <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-brand-600">
+                Features
+              </h2>
+              <ul class="flex flex-col gap-1.5">
+                {product.features.map((f) => (
+                  <li class="flex items-start gap-2 text-sm text-brand-700">
+                    <span class="mt-0.5 text-success" aria-hidden="true">✓</span>
+                    {f.feature}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <!-- Ingredients -->
+          {product.ingredients && (
+            <div class="mb-5">
+              <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-brand-600">
+                Ingredients
+              </h2>
+              <p class="text-sm text-brand-600 leading-relaxed">{product.ingredients}</p>
+            </div>
+          )}
+
+          <!-- Usage instructions -->
+          {product.usageInstructions && (
+            <div class="mb-5">
+              <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-brand-600">
+                How to use
+              </h2>
+              <p class="text-sm text-brand-600 leading-relaxed">{product.usageInstructions}</p>
+            </div>
+          )}
+
+          <!-- CTA -->
+          <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+            <a href="/contact/" class="btn-primary">Enquire about this product</a>
+            <a href="/products/" class="btn-secondary">Back to products</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Related products -->
+      {product.relatedProducts && product.relatedProducts.length > 0 && (
+        <div class="mt-16">
+          <h2 class="mb-6 text-brand-800">Related products</h2>
+          <div class="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {product.relatedProducts.map((p) => (
+              <ProductCard product={p} />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+  <ContactCta productName={product.name} />
+</BaseLayout>
+

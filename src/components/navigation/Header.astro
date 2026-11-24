@@ -1,0 +1,123 @@
+---
+const navLinks = [
+  { label: 'Products', href: '/products/' },
+  { label: 'Categories', href: '/category/' },
+  { label: 'About', href: '/about/' },
+  { label: 'Blog', href: '/blog/' },
+  { label: 'Contact', href: '/contact/' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+<header class="sticky top-0 z-50 border-b border-brand-100 bg-white/95 backdrop-blur-sm">
+  <div class="container-site">
+    <nav aria-label="Main navigation" class="flex h-16 items-center justify-between gap-4">
+      <!-- Logo -->
+      <a href="/" class="flex-shrink-0" aria-label="Epso – go to homepage">
+        <img
+          src="/assets/branding/logo-placeholder.svg"
+          alt="Epso"
+          width="120"
+          height="36"
+          class="h-9 w-auto"
+          loading="eager"
+        />
+      </a>
+
+      <!-- Desktop Navigation -->
+      <ul class="hidden items-center gap-6 md:flex" role="list">
+        {navLinks.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              class={`nav-link text-sm ${currentPath.startsWith(link.href) ? 'text-brand-800 font-semibold' : ''}`}
+              aria-current={currentPath.startsWith(link.href) ? 'page' : undefined}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <!-- Desktop CTA -->
+      <div class="hidden md:block">
+        <a href="/contact/" class="btn-primary text-sm">Enquire now</a>
+      </div>
+
+      <!-- Mobile menu button -->
+      <button
+        id="mobile-menu-btn"
+        class="flex h-10 w-10 items-center justify-center rounded-md text-brand-600 hover:bg-brand-50 md:hidden"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        aria-label="Open navigation menu"
+        type="button"
+      >
+        <svg id="menu-icon-open" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+        <svg id="menu-icon-close" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" class="hidden">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div
+    id="mobile-menu"
+    class="hidden border-t border-brand-100 bg-white animate-slide-down md:hidden"
+    aria-label="Mobile navigation"
+  >
+    <div class="container-site py-4">
+      <ul class="flex flex-col gap-1" role="list">
+        {navLinks.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              class={`block rounded-md px-3 py-2.5 text-sm font-medium ${
+                currentPath.startsWith(link.href)
+                  ? 'bg-brand-50 text-brand-800'
+                  : 'text-brand-600 hover:bg-brand-50 hover:text-brand-800'
+              }`}
+              aria-current={currentPath.startsWith(link.href) ? 'page' : undefined}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+        <li class="mt-2 pt-2 border-t border-brand-100">
+          <a href="/contact/" class="btn-primary w-full text-sm text-center">Enquire now</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</header>
+
+<script>
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  const iconOpen = document.getElementById('menu-icon-open');
+  const iconClose = document.getElementById('menu-icon-close');
+
+  btn?.addEventListener('click', () => {
+    const isOpen = menu?.classList.toggle('hidden') === false;
+    btn.setAttribute('aria-expanded', String(isOpen));
+    iconOpen?.classList.toggle('hidden', isOpen);
+    iconClose?.classList.toggle('hidden', !isOpen);
+  });
+
+  // Close menu on resize to desktop
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768) {
+      menu?.classList.add('hidden');
+      btn?.setAttribute('aria-expanded', 'false');
+      iconOpen?.classList.remove('hidden');
+      iconClose?.classList.add('hidden');
+    }
+  });
+</script>
+

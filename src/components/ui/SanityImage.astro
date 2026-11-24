@@ -1,0 +1,43 @@
+---
+import { sanityImageUrl } from '../../lib/sanity';
+import type { SanityImageAsset } from '../../types/index';
+
+interface Props {
+  image?: SanityImageAsset;
+  alt: string;
+  width: number;
+  height: number;
+  class?: string;
+  loading?: 'eager' | 'lazy';
+  quality?: number;
+  placeholderSrc?: string;
+  fetchpriority?: 'high' | 'low' | 'auto';
+}
+
+const {
+  image,
+  alt,
+  width,
+  height,
+  class: className = '',
+  loading = 'lazy',
+  quality = 80,
+  placeholderSrc = '/assets/products/product-placeholder.svg',
+  fetchpriority,
+} = Astro.props;
+
+const src = image?.asset?._ref
+  ? sanityImageUrl(image, { width, height, quality })
+  : placeholderSrc;
+---
+<img
+  src={src}
+  alt={alt}
+  width={width}
+  height={height}
+  loading={loading}
+  decoding="async"
+  class={className}
+  {...fetchpriority ? { fetchpriority } : {}}
+/>
+

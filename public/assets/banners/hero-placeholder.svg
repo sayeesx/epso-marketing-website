@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 600" width="1440" height="600">
+  <rect width="1440" height="600" fill="#f0f2f5"/>
+  <rect x="560" y="180" width="320" height="240" rx="16" fill="#e1e5eb" stroke="#c8d0dc" stroke-width="2"/>
+  <text x="720" y="285" text-anchor="middle" font-family="system-ui,sans-serif" font-size="20" font-weight="600" fill="#4a5568">Hero Banner</text>
+  <text x="720" y="315" text-anchor="middle" font-family="system-ui,sans-serif" font-size="14" fill="#6b7a8d">Replace with Epso hero image</text>
+  <text x="720" y="338" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" fill="#9daab8">Recommended: 1440 × 600 px</text>
+</svg>
+

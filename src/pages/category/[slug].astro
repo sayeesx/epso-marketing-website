@@ -1,0 +1,101 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/seo/Breadcrumbs.astro';
+import CategoryCard from '../../components/ui/CategoryCard.astro';
+import ProductGrid from '../../components/catalogue/ProductGrid.astro';
+import ContactCta from '../../components/sections/ContactCta.astro';
+import { sanityClient } from '../../lib/sanity';
+import {
+  getAllCategorySlugsQuery,
+  getCategoryBySlugQuery,
+  getProductsByCategoryQuery,
+} from '../../lib/queries';
+import type { Category, Product } from '../../types/index';
+
+export async function getStaticPaths() {
+  try {
+    const slugs = await sanityClient.fetch(getAllCategorySlugsQuery);
+    return (slugs as { slug: string }[]).map((s) => ({ params: { slug: s.slug } }));
+  } catch {
+    return [];
+  }
+}
+
+const { slug } = Astro.params;
+
+let category: Category | null = null;
+let products: Product[] = [];
+
+try {
+  [category, products] = await Promise.all([
+    sanityClient.fetch(getCategoryBySlugQuery, { slug }),
+    sanityClient.fetch(getProductsByCategoryQuery, { slug }),
+  ]);
+} catch {
+  // Could not fetch category
+}
+
+if (!category) {
+  return Astro.redirect('/404');
+}
+
+const parentSlug =
+  typeof category.parent?.slug === 'string'
+    ? category.parent.slug
+    : category.parent?.slug?.current;
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Categories', href: '/category/' },
+  ...(category.parent && parentSlug
+    ? [{ label: category.parent.name, href: `/category/${parentSlug}/` }]
+    : []),
+  { label: category.name, href: `/category/${slug}/` },
+];
+---
+<BaseLayout
+  title={category.seo?.title || category.name}
+  description={category.seo?.description ||
+    category.description ||
+    `Browse Epso ${category.name} products.`}
+>
+  <div class="section-pad">
+    <div class="container-site">
+      <Breadcrumbs items={breadcrumbs} />
+
+      <div class="mb-8">
+        <h1 class="mb-2 text-brand-800">{category.name}</h1>
+        {category.description && (
+          <p class="text-brand-500 max-w-xl">{category.description}</p>
+        )}
+      </div>
+
+      <!-- Subcategories -->
+      {category.children && category.children.length > 0 && (
+        <div class="mb-10">
+          <h2 class="mb-4 text-lg font-semibold text-brand-700">Browse subcategories</h2>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {category.children.map((child) => (
+              <CategoryCard category={child} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- Products in this category -->
+      <div>
+        {products.length > 0 && (
+          <h2 class="mb-5 text-lg font-semibold text-brand-700">
+            Products in {category.name}
+          </h2>
+        )}
+        <ProductGrid
+          products={products}
+          emptyMessage={`No products in ${category.name} yet.`}
+        />
+      </div>
+    </div>
+  </div>
+  <ContactCta />
+</BaseLayout>
+

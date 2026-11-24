@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/seo/Breadcrumbs.astro';
+import ProductGrid from '../../components/catalogue/ProductGrid.astro';
+import { sanityClient } from '../../lib/sanity';
+import { getAllProductsQuery, getRootCategoriesQuery } from '../../lib/queries';
+import type { Product, Category } from '../../types/index';
+
+let products: Product[] = [];
+let categories: Category[] = [];
+
+try {
+  [products, categories] = await Promise.all([
+    sanityClient.fetch(getAllProductsQuery),
+    sanityClient.fetch(getRootCategoriesQuery),
+  ]);
+} catch {
+  // Sanity not configured yet
+}
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Products', href: '/products/' },
+];
+---
+<BaseLayout
+  title="All Products"
+  description="Browse all Epso products — food, snacks, home care and more."
+>
+  <div class="section-pad">
+    <div class="container-site">
+      <Breadcrumbs items={breadcrumbs} />
+      <div class="mb-6">
+        <h1 class="text-brand-800">All Products</h1>
+        <p class="mt-2 text-brand-500">Find the right Epso product for your home.</p>
+      </div>
+
+      <!-- Category filter links -->
+      {categories.length > 0 && (
+        <div class="mb-8 flex flex-wrap gap-2 items-center">
+          <span class="text-sm font-medium text-brand-600">Browse by:</span>
+          {categories.map((cat) => {
+            const catSlug = typeof cat.slug === 'string' ? cat.slug : cat.slug?.current;
+            return (
+              <a href={`/category/${catSlug}/`} class="btn-secondary text-xs px-3 py-1.5">
+                {cat.name}
+              </a>
+            );
+          })}
+        </div>
+      )}
+
+      <ProductGrid
+        products={products}
+        emptyMessage="No products yet. Check back soon."
+      />
+    </div>
+  </div>
+</BaseLayout>
+

@@ -1,0 +1,9 @@
+---
+interface Props {
+  data: Record<string, unknown> | Record<string, unknown>[];
+}
+const { data } = Astro.props;
+const jsonld = JSON.stringify(Array.isArray(data) ? data : [data]);
+---
+<script type="application/ld+json" set:html={jsonld} />
+

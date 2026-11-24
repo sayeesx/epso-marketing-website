@@ -1,0 +1,79 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/seo/Breadcrumbs.astro';
+import SanityImage from '../../components/ui/SanityImage.astro';
+import { sanityClient } from '../../lib/sanity';
+import { getAllBlogPostsQuery } from '../../lib/queries';
+import type { BlogPost } from '../../types/index';
+
+let posts: BlogPost[] = [];
+try {
+  posts = await sanityClient.fetch(getAllBlogPostsQuery);
+} catch {
+  // Sanity not configured yet
+}
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Blog', href: '/blog/' },
+];
+---
+<BaseLayout title="Blog" description="Tips, recipes and articles from Epso.">
+  <div class="section-pad">
+    <div class="container-site">
+      <Breadcrumbs items={breadcrumbs} />
+      <h1 class="mb-2 text-brand-800">Blog</h1>
+      <p class="mb-8 text-brand-500">Tips and articles from Epso.</p>
+
+      {posts.length > 0 ? (
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {posts.map((post) => (
+            <article class="card overflow-hidden">
+              <a href={`/blog/${post.slug}/`} class="block" aria-label={post.title}>
+                <div class="aspect-video overflow-hidden bg-brand-50">
+                  <SanityImage
+                    image={post.mainImage}
+                    alt={post.title}
+                    width={400}
+                    height={225}
+                    class="h-full w-full object-cover"
+                  />
+                </div>
+              </a>
+              <div class="p-5">
+                {post.publishedAt && (
+                  <time class="text-xs text-brand-400" datetime={post.publishedAt}>
+                    {new Date(post.publishedAt).toLocaleDateString('en-IN', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </time>
+                )}
+                <h2 class="mt-1 mb-2 text-base font-semibold text-brand-800 leading-snug">
+                  <a href={`/blog/${post.slug}/`} class="hover:text-brand-600">
+                    {post.title}
+                  </a>
+                </h2>
+                {post.excerpt && (
+                  <p class="text-sm text-brand-500 line-clamp-2">{post.excerpt}</p>
+                )}
+                <a
+                  href={`/blog/${post.slug}/`}
+                  class="mt-3 inline-block text-sm font-medium text-accent-600 hover:text-accent-700"
+                >
+                  Read more →
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div class="py-16 text-center">
+          <p class="text-brand-500">No articles yet. Check back soon.</p>
+        </div>
+      )}
+    </div>
+  </div>
+</BaseLayout>
+

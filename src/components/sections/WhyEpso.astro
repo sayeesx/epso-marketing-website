@@ -1,0 +1,41 @@
+---
+const reasons = [
+  {
+    icon: '🏠',
+    title: 'Made for Indian homes',
+    description: 'Products designed for everyday needs in Indian households.',
+  },
+  {
+    icon: '✅',
+    title: 'Trusted quality',
+    description: 'Every product goes through quality checks before reaching you.',
+  },
+  {
+    icon: '📦',
+    title: 'Convenient packaging',
+    description: 'Available in sizes that work for your family and your budget.',
+  },
+  {
+    icon: '🌿',
+    title: 'Simple ingredients',
+    description: 'We keep things straightforward — good products at fair prices.',
+  },
+];
+---
+<section class="section-pad bg-white">
+  <div class="container-site">
+    <div class="mb-8 text-center">
+      <h2 class="section-title">Why choose Epso?</h2>
+    </div>
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {reasons.map((reason) => (
+        <div class="rounded-lg border border-brand-100 p-6 text-center">
+          <div class="mb-3 text-3xl" aria-hidden="true">{reason.icon}</div>
+          <h3 class="mb-2 text-base font-semibold text-brand-800">{reason.title}</h3>
+          <p class="text-sm text-brand-500 leading-relaxed">{reason.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+

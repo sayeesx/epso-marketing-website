@@ -1,0 +1,90 @@
+---
+import SEO from '../components/seo/SEO.astro';
+import Header from '../components/navigation/Header.astro';
+import Footer from '../components/navigation/Footer.astro';
+import StructuredData from '../components/seo/StructuredData.astro';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  canonical?: string;
+  image?: string;
+  type?: 'website' | 'article' | 'product';
+  noindex?: boolean;
+  structuredData?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const { title, description, canonical, image, type, noindex, structuredData } = Astro.props;
+
+const siteUrl = import.meta.env.SITE_URL || 'https://epso.in';
+
+const orgSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Epso',
+  url: siteUrl,
+  logo: `${siteUrl}/assets/branding/logo-placeholder.svg`,
+  sameAs: [],
+};
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Epso',
+  url: siteUrl,
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: `${siteUrl}/products/?q={search_term_string}`,
+    'query-input': 'required name=search_term_string',
+  },
+};
+
+const allStructuredData = [
+  orgSchema,
+  websiteSchema,
+  ...(structuredData
+    ? Array.isArray(structuredData)
+      ? structuredData
+      : [structuredData]
+    : []),
+];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1a202c" />
+    <link rel="icon" type="image/svg+xml" href="/assets/branding/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <SEO
+      title={title}
+      description={description}
+      canonical={canonical}
+      image={image}
+      type={type}
+      noindex={noindex}
+    />
+    <StructuredData data={allStructuredData} />
+  </head>
+  <body>
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:btn-primary"
+    >
+      Skip to content
+    </a>
+    <Header />
+    <main id="main-content">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
+

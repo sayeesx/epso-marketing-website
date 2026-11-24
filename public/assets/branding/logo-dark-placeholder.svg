@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <rect width="200" height="60" rx="4" fill="#f8f9fa" stroke="#e1e5eb" stroke-width="1"/>
+  <text x="16" y="40" font-family="system-ui,sans-serif" font-size="30" font-weight="700" fill="#1a202c" letter-spacing="-1">EPSO</text>
+  <text x="108" y="38" font-family="system-ui,sans-serif" font-size="9" fill="#9daab8">PLACEHOLDER</text>
+</svg>
+

@@ -1,0 +1,24 @@
+---
+import type { Product } from '../../types/index';
+import ProductCard from '../ui/ProductCard.astro';
+
+interface Props {
+  products: Product[];
+  emptyMessage?: string;
+}
+const { products, emptyMessage = 'No products found.' } = Astro.props;
+---
+{products.length > 0 ? (
+  <div class="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+    {products.map((product) => (
+      <ProductCard product={product} />
+    ))}
+  </div>
+) : (
+  <div class="py-16 text-center">
+    <div class="mb-3 text-4xl" aria-hidden="true">📦</div>
+    <p class="text-brand-500">{emptyMessage}</p>
+    <a href="/products/" class="btn-secondary mt-4 inline-block">View all products</a>
+  </div>
+)}
+

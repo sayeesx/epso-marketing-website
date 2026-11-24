@@ -1,0 +1,29 @@
+---
+import type { Product } from '../../types/index';
+import ProductCard from '../ui/ProductCard.astro';
+
+interface Props {
+  products: Product[];
+  heading?: string;
+}
+const { products, heading = 'Featured products' } = Astro.props;
+---
+<section class="section-pad bg-brand-50">
+  <div class="container-site">
+    <div class="mb-8 text-center">
+      <h2 class="section-title">{heading}</h2>
+      <p class="section-subtitle mx-auto max-w-xl mt-2">
+        Some of our most popular products.
+      </p>
+    </div>
+    <div class="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      {products.map((product) => (
+        <ProductCard product={product} />
+      ))}
+    </div>
+    <div class="mt-8 text-center">
+      <a href="/products/" class="btn-primary">View all products</a>
+    </div>
+  </div>
+</section>
+

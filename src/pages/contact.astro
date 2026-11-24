@@ -1,0 +1,101 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  name: 'Contact Epso',
+};
+---
+<BaseLayout
+  title="Contact Us"
+  description="Have a question about Epso products? Get in touch with us."
+  structuredData={schema}
+>
+  <div class="section-pad">
+    <div class="container-site">
+      <div class="mx-auto max-w-xl">
+        <h1 class="mb-2 text-brand-800">Contact us</h1>
+        <p class="mb-8 text-brand-500">Have a question? We are happy to help.</p>
+
+        <div class="rounded-lg border border-accent-200 bg-accent-50 p-5 mb-8">
+          <p class="text-sm text-accent-700 font-medium">
+            📝 This contact form is a placeholder. Configure your WhatsApp number or email in .env and implement your preferred contact method here.
+          </p>
+        </div>
+
+        <form
+          name="contact"
+          method="POST"
+          class="space-y-5"
+          aria-label="Contact form"
+        >
+          <div>
+            <label for="name" class="mb-1.5 block text-sm font-medium text-brand-700">
+              Your name
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              autocomplete="name"
+              class="w-full rounded-md border border-brand-300 px-4 py-2.5 text-sm text-brand-800 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20"
+              placeholder="Enter your name"
+            />
+          </div>
+          <div>
+            <label for="phone" class="mb-1.5 block text-sm font-medium text-brand-700">
+              Phone number
+            </label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              autocomplete="tel"
+              class="w-full rounded-md border border-brand-300 px-4 py-2.5 text-sm text-brand-800 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20"
+              placeholder="+91 XXXXX XXXXX"
+            />
+          </div>
+          <div>
+            <label for="email" class="mb-1.5 block text-sm font-medium text-brand-700">
+              Email address
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              autocomplete="email"
+              class="w-full rounded-md border border-brand-300 px-4 py-2.5 text-sm text-brand-800 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20"
+              placeholder="your@email.com"
+            />
+          </div>
+          <div>
+            <label for="message" class="mb-1.5 block text-sm font-medium text-brand-700">
+              Your message
+            </label>
+            <textarea
+              id="message"
+              name="message"
+              rows="4"
+              required
+              class="w-full rounded-md border border-brand-300 px-4 py-2.5 text-sm text-brand-800 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20 resize-none"
+              placeholder="Tell us what you need..."
+            ></textarea>
+          </div>
+          <button type="submit" class="btn-primary w-full">Send message</button>
+        </form>
+
+        <div class="mt-8 rounded-lg bg-brand-50 p-5">
+          <h2 class="mb-3 text-sm font-semibold text-brand-700">Other ways to reach us</h2>
+          <div class="space-y-2 text-sm text-brand-500">
+            <p>📞 Phone: <em>[To be updated]</em></p>
+            <p>📧 Email: <em>[To be updated]</em></p>
+            <p>💬 WhatsApp: <em>[To be configured]</em></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+

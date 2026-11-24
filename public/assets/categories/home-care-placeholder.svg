@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <rect width="400" height="300" fill="#f0f9ff"/>
+  <rect x="140" y="80" width="120" height="120" rx="10" fill="#bae6fd" stroke="#7dd3fc" stroke-width="2"/>
+  <text x="200" y="148" text-anchor="middle" font-family="system-ui,sans-serif" font-size="36">🧹</text>
+  <text x="200" y="230" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" font-weight="600" fill="#0c4a6e">Home Care</text>
+  <text x="200" y="252" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#0369a1">Replace with category image</text>
+</svg>
+

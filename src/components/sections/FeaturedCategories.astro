@@ -1,0 +1,29 @@
+---
+import type { Category } from '../../types/index';
+import CategoryCard from '../ui/CategoryCard.astro';
+
+interface Props {
+  categories: Category[];
+  heading?: string;
+}
+const { categories, heading = 'What we make' } = Astro.props;
+---
+<section class="section-pad bg-white">
+  <div class="container-site">
+    <div class="mb-8 text-center">
+      <h2 class="section-title">{heading}</h2>
+      <p class="section-subtitle mx-auto max-w-xl mt-2">
+        From snacks to cleaning products — find the right Epso product for your home.
+      </p>
+    </div>
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {categories.map((cat) => (
+        <CategoryCard category={cat} />
+      ))}
+    </div>
+    <div class="mt-8 text-center">
+      <a href="/category/" class="btn-secondary">See all categories</a>
+    </div>
+  </div>
+</section>
+

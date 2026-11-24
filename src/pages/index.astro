@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/sections/Hero.astro';
+import FeaturedCategories from '../components/sections/FeaturedCategories.astro';
+import FeaturedProducts from '../components/sections/FeaturedProducts.astro';
+import WhyEpso from '../components/sections/WhyEpso.astro';
+import ContactCta from '../components/sections/ContactCta.astro';
+import { sanityClient } from '../lib/sanity';
+import {
+  getHomepageContentQuery,
+  getRootCategoriesQuery,
+  getFeaturedProductsQuery,
+} from '../lib/queries';
+import type { HomepageContent, Category, Product } from '../types/index';
+
+// Fetch from Sanity during build — graceful fallback if Sanity not yet configured
+let homepage: HomepageContent | null = null;
+let categories: Category[] = [];
+let featuredProducts: Product[] = [];
+
+try {
+  [homepage, categories, featuredProducts] = await Promise.all([
+    sanityClient.fetch(getHomepageContentQuery),
+    sanityClient.fetch(getRootCategoriesQuery),
+    sanityClient.fetch(getFeaturedProductsQuery),
+  ]);
+} catch {
+  // Sanity not yet configured — use placeholder content
+  // Configure SANITY_PROJECT_ID in .env to enable full content
+}
+
+// Fallback placeholder categories when Sanity is not configured
+const displayCategories: Category[] =
+  categories.length > 0
+    ? categories
+    : [
+        {
+          _id: 'placeholder-food',
+          _type: 'category',
+          name: 'Food Products',
+          slug: { _type: 'slug', current: 'food' },
+          description: 'Kerala mixtures, snacks, nuts and more.',
+        },
+        {
+          _id: 'placeholder-homecare',
+          _type: 'category',
+          name: 'Home Care',
+          slug: { _type: 'slug', current: 'home-care' },
+          description: 'Dishwashing, floor cleaners and household cleaning products.',
+        },
+      ];
+---
+<BaseLayout
+  title="Everyday Products for Every Home"
+  description="Epso makes food and home care products for Indian households. Explore our range of snacks, mixtures, cleaning products and more."
+>
+  <Hero
+    heading={homepage?.heroHeading || 'Good products for every home.'}
+    subheading={homepage?.heroSubheading ||
+      'Epso makes everyday food and home care products for Indian households.'}
+  />
+
+  <FeaturedCategories categories={displayCategories} />
+
+  {featuredProducts.length > 0 && <FeaturedProducts products={featuredProducts} />}
+
+  <!-- Brand introduction -->
+  <section class="section-pad bg-white">
+    <div class="container-site">
+      <div class="mx-auto max-w-2xl text-center">
+        <h2 class="section-title">{homepage?.brandIntroTitle || 'About Epso'}</h2>
+        <p class="section-subtitle mt-3">
+          {homepage?.brandIntroText ||
+            'Epso is an Indian FMCG brand making everyday products for homes across Kerala. From food to cleaning, we keep things simple and good.'}
+        </p>
+        <a href="/about/" class="btn-secondary mt-6 inline-block">Learn more about us</a>
+      </div>
+    </div>
+  </section>
+
+  <WhyEpso />
+  <ContactCta />
+</BaseLayout>

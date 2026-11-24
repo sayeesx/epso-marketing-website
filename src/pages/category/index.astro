@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/seo/Breadcrumbs.astro';
+import CategoryCard from '../../components/ui/CategoryCard.astro';
+import { sanityClient } from '../../lib/sanity';
+import { getRootCategoriesQuery } from '../../lib/queries';
+import type { Category } from '../../types/index';
+
+let categories: Category[] = [];
+try {
+  categories = await sanityClient.fetch(getRootCategoriesQuery);
+} catch {
+  // Sanity not configured yet
+}
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Categories', href: '/category/' },
+];
+---
+<BaseLayout
+  title="Product Categories"
+  description="Browse all Epso product categories — food, home care and more."
+>
+  <div class="section-pad">
+    <div class="container-site">
+      <Breadcrumbs items={breadcrumbs} />
+      <h1 class="mb-2 text-brand-800">Categories</h1>
+      <p class="mb-8 text-brand-500">Find the right product for your home.</p>
+
+      {categories.length > 0 ? (
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {categories.map((cat) => (
+            <CategoryCard category={cat} />
+          ))}
+        </div>
+      ) : (
+        <div class="py-16 text-center">
+          <p class="text-brand-500">Categories coming soon.</p>
+        </div>
+      )}
+    </div>
+  </div>
+</BaseLayout>
+
