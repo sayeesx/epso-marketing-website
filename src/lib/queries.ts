@@ -12,7 +12,7 @@ export const getAllCategoriesQuery = `
     image,
     displayOrder,
     "parent": parent->{ _id, name, "slug": slug.current },
-    "seo": seo{ title, description }
+    "seo": seo{ title, description, ogImage }
   }
 `;
 
@@ -24,7 +24,7 @@ export const getRootCategoriesQuery = `
     description,
     image,
     displayOrder,
-    "seo": seo{ title, description }
+    "seo": seo{ title, description, ogImage }
   }
 `;
 
@@ -37,7 +37,7 @@ export const getCategoryBySlugQuery = `
     image,
     displayOrder,
     "parent": parent->{ _id, name, "slug": slug.current },
-    "seo": seo{ title, description },
+    "seo": seo{ title, description, ogImage },
     "children": *[_type == "category" && references(^._id)] | order(displayOrder asc) {
       _id,
       name,
@@ -102,7 +102,7 @@ export const getProductBySlugQuery = `
       "slug": slug.current,
       "parent": parent->{ _id, name, "slug": slug.current }
     },
-    "seo": seo{ title, description },
+    "seo": seo{ title, description, ogImage },
     "relatedProducts": *[
       _type == "product" &&
       isPublished == true &&
@@ -132,6 +132,7 @@ export const getHomepageContentQuery = `
     heroHeading,
     heroSubheading,
     heroImage,
+    ogImage,
     brandIntroTitle,
     brandIntroText,
     "featuredCategories": featuredCategories[]->{
@@ -157,6 +158,7 @@ export const getSiteSettingsQuery = `
     siteName,
     tagline,
     logo,
+    ogImage,
     contactEmail,
     contactPhone,
     whatsappNumber,
@@ -173,7 +175,7 @@ export const getAllBlogPostsQuery = `
     excerpt,
     publishedAt,
     mainImage,
-    "seo": seo{ title, description }
+    "seo": seo{ title, description, ogImage }
   }
 `;
 
@@ -186,11 +188,10 @@ export const getBlogPostBySlugQuery = `
     body,
     publishedAt,
     mainImage,
-    "seo": seo{ title, description }
+    "seo": seo{ title, description, ogImage }
   }
 `;
 
 export const getAllBlogSlugsQuery = `
   *[_type == "blogPost"] { "slug": slug.current }
 `;
-

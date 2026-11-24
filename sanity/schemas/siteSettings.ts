@@ -23,6 +23,21 @@ export default defineType({
       title: 'Logo',
       type: 'image',
       description: 'Upload the official Epso logo here when available.',
+      options: { hotspot: true },
+    }),
+    defineField({
+      name: 'ogImage',
+      title: 'Default OpenGraph / Social Share Image',
+      type: 'image',
+      description: 'Default preview image when sharing the website on WhatsApp, Facebook, LinkedIn, Twitter/X. Recommended: 1200×630 px.',
+      options: { hotspot: true },
+      fields: [
+        defineField({
+          name: 'alt',
+          title: 'Image description (alt text)',
+          type: 'string',
+        }),
+      ],
     }),
     defineField({
       name: 'contactEmail',
@@ -70,4 +85,3 @@ export default defineType({
     }),
   ],
 });
-

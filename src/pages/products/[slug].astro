@@ -80,7 +80,7 @@ const productSchema = {
 <BaseLayout
   title={product.seo?.title || product.name}
   description={product.seo?.description || product.shortDescription || `${product.name} by Epso.`}
-  image={productImageUrl}
+  image={product.seo?.ogImage || product.mainImage || productImageUrl}
   type="product"
   structuredData={productSchema}
 >

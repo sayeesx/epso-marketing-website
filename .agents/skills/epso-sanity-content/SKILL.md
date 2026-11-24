@@ -19,3 +19,4 @@ The Sanity Studio lives in the `/sanity` directory and is configured for non-tec
 - All fetches are wrapped in `try/catch` with graceful fallback placeholders when Sanity credentials are not yet configured.
 - Slugs are always projected as `"slug": slug.current`.
 - Never expose private Sanity write tokens in public frontend builds.
+

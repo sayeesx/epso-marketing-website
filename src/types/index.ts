@@ -74,6 +74,7 @@ export interface Product {
 export interface SEOFields {
   title?: string;
   description?: string;
+  ogImage?: SanityImageAsset;
 }
 
 export interface BlogPost {
@@ -93,6 +94,7 @@ export interface SiteSettings {
   siteName: string;
   tagline?: string;
   logo?: SanityImageAsset;
+  ogImage?: SanityImageAsset;
   contactEmail?: string;
   contactPhone?: string;
   whatsappNumber?: string;
@@ -108,6 +110,7 @@ export interface HomepageContent {
   heroHeading?: string;
   heroSubheading?: string;
   heroImage?: SanityImageAsset;
+  ogImage?: SanityImageAsset;
   brandIntroTitle?: string;
   brandIntroText?: string;
   featuredCategories?: Category[];
@@ -126,4 +129,3 @@ export interface NavLink {
   href: string;
   children?: NavLink[];
 }
-

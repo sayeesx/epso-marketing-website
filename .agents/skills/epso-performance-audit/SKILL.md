@@ -21,3 +21,4 @@ description: Performance optimization strategies, Core Web Vitals targets, and a
 4. **Layout Shift Prevention**: Explicit `width` and `height` (and aspect ratios) on all `<img>` tags.
 5. **Modern Image Formats**: Automatic AVIF/WebP transformations via Sanity Image CDN.
 6. **Font Loading**: `preconnect` to Google Fonts and lightweight font weight subsets.
+

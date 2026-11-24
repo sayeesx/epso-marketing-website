@@ -24,3 +24,4 @@ description: Standards, coding conventions, and architectural rules for developi
 - `src/components/ui/SanityImage.astro`: Image loader using Sanity Image CDN with fallback.
 - `src/components/catalogue/ProductGrid.astro`: Responsive grid with empty state handling.
 - `src/components/seo/SEO.astro` & `Breadcrumbs.astro`: Complete SEO & JSON-LD handling.
+

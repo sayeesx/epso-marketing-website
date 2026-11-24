@@ -1,9 +1,12 @@
 ---
+import { sanityImageUrl } from '../../lib/sanity';
+import type { SanityImageAsset } from '../../types/index';
+
 interface Props {
   title?: string;
   description?: string;
   canonical?: string;
-  image?: string;
+  image?: string | SanityImageAsset;
   type?: 'website' | 'article' | 'product';
   noindex?: boolean;
 }
@@ -21,7 +24,20 @@ const siteName = 'Epso';
 const siteUrl = import.meta.env.SITE_URL || 'https://epso.in';
 const pageTitle = title ? `${title} | ${siteName}` : `${siteName} – Everyday Products for Every Home`;
 const canonicalUrl = canonical || new URL(Astro.url.pathname, siteUrl).href;
-const ogImage = image.startsWith('http') ? image : new URL(image, siteUrl).href;
+
+let resolvedImageUrl: string;
+if (typeof image === 'object' && image !== null && 'asset' in image) {
+  resolvedImageUrl = sanityImageUrl(image as SanityImageAsset, {
+    width: 1200,
+    height: 630,
+    format: 'webp',
+    fit: 'crop',
+  });
+} else if (typeof image === 'string') {
+  resolvedImageUrl = image.startsWith('http') ? image : new URL(image, siteUrl).href;
+} else {
+  resolvedImageUrl = new URL('/assets/banners/hero-placeholder.svg', siteUrl).href;
+}
 ---
 <title>{pageTitle}</title>
 <meta name="description" content={description} />
@@ -33,7 +49,9 @@ const ogImage = image.startsWith('http') ? image : new URL(image, siteUrl).href;
 <meta property="og:title" content={pageTitle} />
 <meta property="og:description" content={description} />
 <meta property="og:url" content={canonicalUrl} />
-<meta property="og:image" content={ogImage} />
+<meta property="og:image" content={resolvedImageUrl} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
 <meta property="og:site_name" content={siteName} />
 <meta property="og:locale" content="en_IN" />
 
@@ -41,5 +59,4 @@ const ogImage = image.startsWith('http') ? image : new URL(image, siteUrl).href;
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={pageTitle} />
 <meta name="twitter:description" content={description} />
-<meta name="twitter:image" content={ogImage} />
-
+<meta name="twitter:image" content={resolvedImageUrl} />

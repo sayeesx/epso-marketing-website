@@ -32,3 +32,4 @@ Central asset directory: `public/assets/`
 - Category: `public/assets/categories/food-placeholder.svg`, `home-care-placeholder.svg` (400x300, 4:3)
 
 Always use `SanityImage.astro` for Sanity images and `PlaceholderImage.astro` for structural placeholders. Always specify width and height to prevent Cumulative Layout Shift (CLS).
+

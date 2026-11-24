@@ -24,3 +24,4 @@ Handled via `src/components/seo/StructuredData.astro` and `src/layouts/BaseLayou
 - `public/robots.txt` points to `https://epso.in/sitemap-index.xml` and blocks `/studio/`.
 - `@astrojs/sitemap` auto-generates the XML sitemap on build.
 - `noindex` applied to utility pages (e.g. `/privacy-policy/` and `/404`).
+

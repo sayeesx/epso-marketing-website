@@ -56,6 +56,7 @@ export default defineType({
       name: 'seo',
       title: 'SEO settings',
       type: 'object',
+      description: 'Search engine and social sharing settings.',
       fields: [
         defineField({
           name: 'title',
@@ -69,6 +70,20 @@ export default defineType({
           type: 'text',
           rows: 2,
           validation: (Rule) => Rule.max(160),
+        }),
+        defineField({
+          name: 'ogImage',
+          title: 'OpenGraph / Social share image',
+          type: 'image',
+          description: 'Custom social sharing image (1200×630 px). If left blank, the main article image is used.',
+          options: { hotspot: true },
+          fields: [
+            defineField({
+              name: 'alt',
+              title: 'Image description (alt text)',
+              type: 'string',
+            }),
+          ],
         }),
       ],
     }),
@@ -86,4 +101,3 @@ export default defineType({
     }),
   },
 });
-

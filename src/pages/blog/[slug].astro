@@ -56,7 +56,7 @@ const breadcrumbs = [
 <BaseLayout
   title={post.seo?.title || post.title}
   description={post.seo?.description || post.excerpt || ''}
-  image={postImageUrl}
+  image={post.seo?.ogImage || post.mainImage || postImageUrl}
   type="article"
   structuredData={articleSchema}
 >

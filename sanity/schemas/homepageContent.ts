@@ -28,6 +28,20 @@ export default defineType({
       options: { hotspot: true },
     }),
     defineField({
+      name: 'ogImage',
+      title: 'OpenGraph / Social share image',
+      type: 'image',
+      description: 'Custom social sharing banner for the homepage (1200×630 px). If left blank, the hero image or default brand image is used.',
+      options: { hotspot: true },
+      fields: [
+        defineField({
+          name: 'alt',
+          title: 'Image description (alt text)',
+          type: 'string',
+        }),
+      ],
+    }),
+    defineField({
       name: 'brandIntroTitle',
       title: 'Brand intro heading',
       type: 'string',
@@ -58,4 +72,3 @@ export default defineType({
     }),
   ],
 });
-
