@@ -18,7 +18,7 @@ const {
 ---
 <section
   id="hero-section"
-  class="relative overflow-hidden w-full pt-4 sm:pt-6 md:pt-8 pb-0 flex flex-col items-center justify-between"
+  class="relative overflow-hidden w-full pt-3 sm:pt-5 md:pt-6 pb-0 flex flex-col items-center"
   style="background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.95) 0%, rgba(254, 235, 211, 0.6) 42%, rgba(246, 184, 116, 0.45) 72%, transparent 100%), linear-gradient(180deg, #FFFFFF 0%, #FFF9F3 18%, #FDEBD3 40%, #F6B874 68%, #EB8D35 100%);"
 >
   <!-- Atmospheric golden ambient glow behind the title -->
@@ -28,37 +28,39 @@ const {
   ></div>
 
   <!-- TITLE BEHIND THE IMAGE (Rendered in Insanibc font with balanced, refined scale) -->
-  <div class="relative z-0 w-full max-w-5xl px-4 sm:px-6 lg:px-8 text-center select-none -mt-2 sm:-mt-3">
+  <div class="relative z-0 w-full max-w-5xl px-4 sm:px-6 lg:px-8 text-center select-none -mt-1 sm:-mt-2">
     <h1
-      class="font-insanibc uppercase tracking-wide text-brand-950 text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-[1.05] drop-shadow-xs"
+      class="font-insanibc uppercase tracking-wide text-brand-950 text-[26px] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-[1.05] drop-shadow-xs"
       style="font-family: 'Insanibc', 'Insaniburger with Cheese', sans-serif !important; font-weight: normal; font-style: normal;"
     >
       {heading}
     </h1>
   </div>
 
-  <!-- 3D TRUCK ON GLOBE: FULL WIDTH OF SCREEN ACROSS PORTRAIT & LANDSCAPE (shifted slightly down, bottom slightly cropped) -->
-  <div class="relative z-10 w-full px-0 mt-2 sm:mt-1 md:-mt-2 lg:-mt-4 flex flex-col items-center overflow-hidden">
-    <div
-      class="w-full flex justify-center animate-float will-change-transform -mb-[6%]"
-      style="clip-path: inset(0 0 8% 0);"
-    >
-      <img
-        src={imageSrc}
-        alt={imageAlt}
-        width="1661"
-        height="947"
-        loading="eager"
-        fetchpriority="high"
-        decoding="sync"
-        class="w-full min-w-full max-w-none h-auto object-cover sm:object-contain object-bottom"
-      />
-    </div>
+  <!-- 3D TRUCK ON GLOBE: FULL WIDTH OF SCREEN, STATIC (NO FLOAT), BOTTOM SMOOTHLY CROPPED & BLENDED -->
+  <div class="relative z-10 w-full px-0 mt-1 sm:mt-0 md:-mt-2 lg:-mt-4 overflow-hidden">
+    <img
+      src={imageSrc}
+      alt={imageAlt}
+      width="1661"
+      height="947"
+      loading="eager"
+      fetchpriority="high"
+      decoding="sync"
+      class="block w-full h-auto object-cover object-top -mb-[7%]"
+    />
 
-    <!-- Marketplace availability badge & quick action buttons shifted higher onto the hero globe -->
-    <div class="relative z-30 -mt-20 sm:-mt-32 md:-mt-44 lg:-mt-56 pb-10 sm:pb-16 md:pb-24 lg:pb-28 flex flex-col items-center gap-3 px-4">
-      <div class="inline-flex flex-col sm:flex-row items-center gap-2 sm:gap-3 rounded-2xl sm:rounded-full border border-white/80 bg-white/85 px-4 sm:px-5 py-1.5 sm:py-2 backdrop-blur-md transition-colors duration-300 hover:bg-white">
-        <span class="text-xs font-semibold tracking-wide text-brand-900/90 whitespace-nowrap">
+    <!-- Ultra-smooth multi-stop eased bottom-edge blend into white page -->
+    <div
+      class="pointer-events-none absolute bottom-0 inset-x-0 z-20 h-[44%] sm:h-[38%] md:h-[32%]"
+      style="background: linear-gradient(to top, #ffffff 0%, #ffffff 12%, rgba(255,255,255,0.92) 28%, rgba(255,255,255,0.68) 48%, rgba(255,255,255,0.34) 72%, rgba(255,255,255,0.10) 88%, rgba(255,255,255,0) 100%);"
+      aria-hidden="true"
+    ></div>
+
+    <!-- Marketplace availability badge & desktop-only action buttons shifted higher onto the hero globe -->
+    <div class="absolute inset-x-0 bottom-[22%] sm:bottom-[23%] md:bottom-[26%] lg:bottom-[29%] z-30 flex flex-col items-center gap-2.5 px-4">
+      <div class="inline-flex flex-col sm:flex-row items-center gap-1 sm:gap-3 rounded-2xl sm:rounded-full border border-white/80 bg-white/85 px-3.5 sm:px-5 py-1.5 sm:py-2 backdrop-blur-md transition-colors duration-300 hover:bg-white">
+        <span class="text-[11px] sm:text-xs font-semibold tracking-wide text-brand-900/90 whitespace-nowrap">
           Available now on
         </span>
         <div class="flex items-center gap-3 sm:gap-4">
@@ -68,7 +70,7 @@ const {
               alt="Amazon"
               width="72"
               height="22"
-              class="h-3.5 sm:h-4 w-auto object-contain translate-y-0.5"
+              class="h-3 sm:h-4 w-auto object-contain translate-y-0.5"
             />
           </div>
           <span class="h-3 w-px bg-brand-300/70 hidden sm:block" aria-hidden="true"></span>
@@ -78,7 +80,7 @@ const {
               alt="Flipkart"
               width="86"
               height="26"
-              class="h-[19px] sm:h-[22px] w-auto object-contain"
+              class="h-[16px] sm:h-[22px] w-auto object-contain"
             />
           </div>
           <span class="h-3 w-px bg-brand-300/70 hidden sm:block" aria-hidden="true"></span>
@@ -88,31 +90,24 @@ const {
               alt="JioMart"
               width="18"
               height="18"
-              class="h-4 w-4 object-contain rounded-full"
+              class="h-3.5 sm:h-4 w-3.5 sm:w-4 object-contain rounded-full"
             />
-            <span class="text-xs sm:text-[13px] font-extrabold tracking-tight text-[#1a1a1a]">JioMart</span>
+            <span class="text-[11px] sm:text-[13px] font-extrabold tracking-tight text-[#1a1a1a]">JioMart</span>
           </div>
         </div>
       </div>
 
-      <!-- Quick action buttons (smaller height, wider width, shadow-free) -->
-      <div class="flex flex-col sm:flex-row items-center gap-3">
-        <a href={primaryCta.href} class="btn-primary min-w-[190px] sm:min-w-[210px] px-10 py-2 text-xs sm:text-sm transition-transform hover:-translate-y-0.5">
+      <!-- Quick action buttons (desktop/tablet only, hidden on mobile browsers) -->
+      <div class="hidden md:flex items-center gap-3">
+        <a href={primaryCta.href} class="btn-primary min-w-[210px] px-10 py-2 text-sm transition-transform hover:-translate-y-0.5">
           {primaryCta.label}
         </a>
-        <a href={secondaryCta.href} class="btn-secondary min-w-[190px] sm:min-w-[210px] px-10 py-2 text-xs sm:text-sm bg-white/90 backdrop-blur-md transition-transform hover:-translate-y-0.5">
+        <a href={secondaryCta.href} class="btn-secondary min-w-[210px] px-10 py-2 text-sm bg-white/90 backdrop-blur-md transition-transform hover:-translate-y-0.5">
           {secondaryCta.label}
         </a>
       </div>
     </div>
   </div>
-
-  <!-- Ultra-smooth multi-stop eased bottom-edge fade into white page -->
-  <div
-    class="pointer-events-none absolute bottom-0 inset-x-0 z-20 h-32 sm:h-44 md:h-52"
-    style="background: linear-gradient(to top, #ffffff 0%, rgba(255,255,255,0.96) 14%, rgba(255,255,255,0.82) 32%, rgba(255,255,255,0.52) 55%, rgba(255,255,255,0.18) 78%, rgba(255,255,255,0) 100%);"
-    aria-hidden="true"
-  ></div>
 </section>
 
 <!-- SCROLL-ONLY THREE.JS VOLUMETRIC SMOKE EFFECT (Animates smoothly only while scrolling) -->
@@ -130,6 +125,7 @@ const {
   function initRealisticSmokeClouds() {
     const container = document.getElementById('hero-smoke-container');
     const hero = document.getElementById('hero-section');
+    const whatWeMake = document.getElementById('what-we-make');
     if (!container || !hero) return;
 
     let renderer: THREE.WebGLRenderer;
@@ -292,22 +288,30 @@ const {
       const dt = Math.min((now - lastFrameTime) * 0.001, 0.05);
       lastFrameTime = now;
 
-      const heroH = hero?.offsetHeight || 750;
+      const heroRect = hero!.getBoundingClientRect();
+      const heroH = heroRect.height || 750;
+      const cutoffY = whatWeMake ? whatWeMake.getBoundingClientRect().top : heroRect.bottom;
+      const clampedCutoff = Math.max(0, Math.min(window.innerHeight, cutoffY));
+
       smoothScrollY += (targetScrollY - smoothScrollY) * Math.min(1, dt * 14);
-      const progress = Math.min(Math.max(smoothScrollY / (heroH * 1.25), 0), 1);
+      const progress = Math.min(Math.max(smoothScrollY / Math.max(heroH * 1.05, 320), 0), 1);
 
       const fadeIn = smoothstep(0.0, 0.08, progress);
-      const fadeOut = 1 - smoothstep(0.75, 1.0, progress);
-      const vis = smoothScrollY <= 4 && targetScrollY <= 4 ? 0 : fadeIn * fadeOut;
+      const fadeOut = 1 - smoothstep(0.72, 1.0, progress);
+      const vis = (smoothScrollY <= 4 && targetScrollY <= 4) || clampedCutoff <= 1 ? 0 : fadeIn * fadeOut;
 
-      if (vis <= 0.005 && (targetScrollY <= 4 || targetScrollY >= heroH * 1.25)) {
+      if (vis <= 0.005 && (targetScrollY <= 4 || clampedCutoff <= 1 || progress >= 0.995)) {
         uniforms.uVisibility.value = 0;
         container!.style.opacity = '0';
         container!.style.visibility = 'hidden';
+        container!.style.clipPath = 'inset(0px 0px 100% 0px)';
         rafId = 0;
         return;
       }
 
+      // Strictly clip smoke to end at the top edge of "What we make"
+      const clipBottom = Math.max(0, window.innerHeight - clampedCutoff);
+      container!.style.clipPath = `inset(0px 0px ${clipBottom}px 0px)`;
       container!.style.visibility = 'visible';
       container!.style.opacity = '1';
 
