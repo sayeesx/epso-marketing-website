@@ -20,48 +20,52 @@ const footerLinks = {
 ---
 <footer class="border-t border-neutral-800 bg-black text-white">
   <div class="container-site py-14">
-    <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid grid-cols-2 gap-8 lg:grid-cols-4">
       <!-- Brand column -->
-      <div class="sm:col-span-2 lg:col-span-1">
-        <a href="/" class="inline-block mb-4 transition-opacity hover:opacity-90" aria-label="Epso homepage">
+      <div class="col-span-2 lg:col-span-1">
+        <a href="/" class="inline-flex items-center gap-2.5 mb-4 transition-opacity hover:opacity-90" aria-label="Epso Marketing homepage">
           <img
             src="/logo.png"
-            alt="Epso"
+            alt="Epso Marketing"
             width="560"
             height="548"
             class="h-11 w-auto object-contain"
             loading="lazy"
           />
+          <span class="text-base font-bold tracking-wide text-white">Epso Marketing</span>
         </a>
         <p class="text-sm text-neutral-400 leading-relaxed max-w-xs font-normal">
           Good products for every home. Food and home care made for everyday Indian life.
         </p>
       </div>
 
-      <!-- Link columns -->
-      {Object.entries(footerLinks).map(([heading, links]) => (
-        <div>
-          <h3 class="mb-3.5 text-xs font-bold text-white uppercase tracking-widest">{heading}</h3>
-          <ul class="flex flex-col gap-2.5" role="list">
-            {links.map((link) => (
-              <li>
-                <a href={link.href} class="text-sm text-neutral-400 hover:text-white font-medium transition-colors">
-                  {link.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+      <!-- Link columns: Products & Company side-by-side on mobile, Help centered below on mobile -->
+      {Object.entries(footerLinks).map(([heading, links]) => {
+        const isHelp = heading === 'Help';
+        return (
+          <div class={isHelp ? 'col-span-2 text-center lg:col-span-1 lg:text-left' : 'col-span-1'}>
+            <h3 class="mb-3.5 text-xs font-bold text-white uppercase tracking-widest">{heading}</h3>
+            <ul class={`flex flex-col gap-2.5 ${isHelp ? 'items-center lg:items-start' : ''}`} role="list">
+              {links.map((link) => (
+                <li>
+                  <a href={link.href} class="text-sm text-neutral-400 hover:text-white font-medium transition-colors">
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
     </div>
 
     <div class="mt-12 border-t border-neutral-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
       <p class="text-xs text-neutral-500">
-        &copy; {currentYear} Epso. All rights reserved.
+        &copy; {currentYear} Epso Marketing. All rights reserved.
       </p>
-      <div class="flex gap-4">
-        <a href="/privacy-policy/" class="text-xs text-neutral-500 hover:text-white transition-colors">Privacy Policy</a>
-      </div>
+      <p class="text-xs text-neutral-500">
+        Developed by <a href="https://www.narrs.in" target="_blank" rel="noopener noreferrer" class="text-neutral-300 hover:text-white underline underline-offset-2 transition-colors">narrs</a>
+      </p>
     </div>
   </div>
 </footer>
