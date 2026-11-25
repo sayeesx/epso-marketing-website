@@ -6,7 +6,6 @@
 @layer base {
   /* Completely remove scrollbars across all browsers while retaining full scrolling capability */
   html {
-    @apply scroll-smooth;
     min-height: 100%;
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
