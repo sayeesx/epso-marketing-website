@@ -33,6 +33,7 @@ export interface Category {
   slug: SanitySlug;
   description?: string;
   image?: SanityImageAsset;
+  imageUrl?: string;
   parent?: Category;
   displayOrder?: number;
   seo?: SEOFields;

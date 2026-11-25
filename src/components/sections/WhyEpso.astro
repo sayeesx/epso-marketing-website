@@ -1,38 +1,45 @@
 ---
+import PhosphorIcon from '../ui/PhosphorIcon.astro';
+
 const reasons = [
   {
-    icon: '🏠',
+    icon: 'house' as const,
     title: 'Made for Indian homes',
     description: 'Products designed for everyday needs in Indian households.',
   },
   {
-    icon: '✅',
+    icon: 'check-circle' as const,
     title: 'Trusted quality',
     description: 'Every product goes through quality checks before reaching you.',
   },
   {
-    icon: '📦',
+    icon: 'package' as const,
     title: 'Convenient packaging',
     description: 'Available in sizes that work for your family and your budget.',
   },
   {
-    icon: '🌿',
+    icon: 'plant' as const,
     title: 'Simple ingredients',
     description: 'We keep things straightforward — good products at fair prices.',
   },
 ];
 ---
-<section class="section-pad bg-white">
+<section class="section-pad bg-transparent">
   <div class="container-site">
-    <div class="mb-8 text-center">
+    <div class="mb-10 text-center">
       <h2 class="section-title">Why choose Epso?</h2>
+      <p class="section-subtitle mx-auto max-w-xl mt-2">
+        Thoughtfully made everyday essentials you can rely on.
+      </p>
     </div>
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
       {reasons.map((reason) => (
-        <div class="rounded-lg border border-brand-100 p-6 text-center">
-          <div class="mb-3 text-3xl" aria-hidden="true">{reason.icon}</div>
-          <h3 class="mb-2 text-base font-semibold text-brand-800">{reason.title}</h3>
-          <p class="text-sm text-brand-500 leading-relaxed">{reason.description}</p>
+        <div class="rounded-2xl border border-white/80 bg-white/75 backdrop-blur-md p-6 sm:p-7 text-center shadow-glass transition-all duration-300 hover:shadow-glass-hover hover:-translate-y-1 hover:bg-white/90">
+          <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 shadow-xs" aria-hidden="true">
+            <PhosphorIcon name={reason.icon} size={28} />
+          </div>
+          <h3 class="mb-2 text-base font-semibold text-brand-900">{reason.title}</h3>
+          <p class="text-sm text-brand-600 leading-relaxed">{reason.description}</p>
         </div>
       ))}
     </div>

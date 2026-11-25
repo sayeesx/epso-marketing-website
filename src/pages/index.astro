@@ -5,6 +5,7 @@ import FeaturedCategories from '../components/sections/FeaturedCategories.astro'
 import FeaturedProducts from '../components/sections/FeaturedProducts.astro';
 import WhyEpso from '../components/sections/WhyEpso.astro';
 import ContactCta from '../components/sections/ContactCta.astro';
+import ArrowButton from '@components/ui/ArrowButton.astro';
 import { sanityClient } from '../lib/sanity';
 import {
   getHomepageContentQuery,
@@ -39,7 +40,8 @@ const displayCategories: Category[] =
           _type: 'category',
           name: 'Food Products',
           slug: { _type: 'slug', current: 'food' },
-          description: 'Kerala mixtures, snacks, nuts and more.',
+          description: 'Kerala mixtures, snacks, biscuits and more.',
+          imageUrl: '/epso_food_product.webp',
         },
         {
           _id: 'placeholder-homecare',
@@ -47,18 +49,21 @@ const displayCategories: Category[] =
           name: 'Home Care',
           slug: { _type: 'slug', current: 'home-care' },
           description: 'Dishwashing, floor cleaners and household cleaning products.',
+          imageUrl: '/epso_home_care.webp',
         },
       ];
 ---
 <BaseLayout
   title="Everyday Products for Every Home"
   description="Epso makes food and home care products for Indian households. Explore our range of snacks, mixtures, cleaning products and more."
-  image={homepage?.ogImage || homepage?.heroImage || '/assets/banners/hero-placeholder.svg'}
+  image={homepage?.ogImage || homepage?.heroImage || '/assets/banners/EPSO-Marketing-Truck-on-Globe.webp'}
 >
   <Hero
-    heading={homepage?.heroHeading || 'Good products for every home.'}
+    heading={homepage?.heroHeading || 'From Our Products to Your Everyday Moments.'}
     subheading={homepage?.heroSubheading ||
       'Epso makes everyday food and home care products for Indian households.'}
+    imageSrc="/assets/banners/EPSO-Marketing-Truck-on-Globe.webp"
+    imageAlt="Epso marketing truck delivering everyday food and home care products on the globe"
   />
 
   <FeaturedCategories categories={displayCategories} />
@@ -66,15 +71,20 @@ const displayCategories: Category[] =
   {featuredProducts.length > 0 && <FeaturedProducts products={featuredProducts} />}
 
   <!-- Brand introduction -->
-  <section class="section-pad bg-white">
+  <section class="section-pad bg-transparent">
     <div class="container-site">
-      <div class="mx-auto max-w-2xl text-center">
-        <h2 class="section-title">{homepage?.brandIntroTitle || 'About Epso'}</h2>
-        <p class="section-subtitle mt-3">
+      <div class="relative mx-auto max-w-3xl overflow-hidden rounded-3xl border border-brand-200/80 bg-white p-8 sm:p-12 text-center shadow-sm">
+        <h2 class="relative section-title text-2xl sm:text-3xl font-bold">{homepage?.brandIntroTitle || 'About Epso'}</h2>
+        <p class="relative section-subtitle mt-3 max-w-xl mx-auto">
           {homepage?.brandIntroText ||
             'Epso is an Indian FMCG brand making everyday products for homes across Kerala. From food to cleaning, we keep things simple and good.'}
         </p>
-        <a href="/about/" class="btn-secondary mt-6 inline-block">Learn more about us</a>
+        <div class="relative mt-8">
+          <a href="/about/" class="group btn-secondary inline-flex items-center gap-2.5 pr-3">
+            <span>Learn more about us</span>
+            <ArrowButton as="span" direction="right" size="sm" color="#1a202c" hoverColor="#eb8d35" />
+          </a>
+        </div>
       </div>
     </div>
   </section>

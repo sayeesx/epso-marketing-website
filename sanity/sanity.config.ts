@@ -6,8 +6,9 @@ import { schemaTypes } from './schemas';
 export default defineConfig({
   name: 'epso-studio',
   title: 'Epso CMS',
-  projectId: process.env.SANITY_STUDIO_PROJECT_ID || 'placeholder',
+  projectId: process.env.SANITY_STUDIO_PROJECT_ID || 'scsgz7wt',
   dataset: process.env.SANITY_STUDIO_DATASET || 'production',
+  basePath: '/admin',
   plugins: [
     deskTool({
       structure: (S) =>

@@ -42,7 +42,7 @@ const breadcrumbs = [
           {categories.map((cat) => {
             const catSlug = typeof cat.slug === 'string' ? cat.slug : cat.slug?.current;
             return (
-              <a href={`/category/${catSlug}/`} class="btn-secondary text-xs px-3 py-1.5">
+              <a href={`/products/?category=${catSlug}`} class="btn-secondary text-xs px-3 py-1.5">
                 {cat.name}
               </a>
             );

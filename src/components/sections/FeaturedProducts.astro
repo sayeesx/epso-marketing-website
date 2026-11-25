@@ -1,6 +1,7 @@
 ---
 import type { Product } from '../../types/index';
 import ProductCard from '../ui/ProductCard.astro';
+import ArrowButton from '@components/ui/ArrowButton.astro';
 
 interface Props {
   products: Product[];
@@ -8,9 +9,9 @@ interface Props {
 }
 const { products, heading = 'Featured products' } = Astro.props;
 ---
-<section class="section-pad bg-brand-50">
+<section class="section-pad bg-transparent">
   <div class="container-site">
-    <div class="mb-8 text-center">
+    <div class="mb-10 text-center">
       <h2 class="section-title">{heading}</h2>
       <p class="section-subtitle mx-auto max-w-xl mt-2">
         Some of our most popular products.
@@ -21,8 +22,11 @@ const { products, heading = 'Featured products' } = Astro.props;
         <ProductCard product={product} />
       ))}
     </div>
-    <div class="mt-8 text-center">
-      <a href="/products/" class="btn-primary">View all products</a>
+    <div class="mt-10 text-center">
+      <a href="/products/" class="group btn-primary inline-flex items-center gap-2.5 pr-3">
+        <span>View all products</span>
+        <ArrowButton as="span" direction="right" size="sm" color="#ffffff" hoverColor="#eb8d35" />
+      </a>
     </div>
   </div>
 </section>

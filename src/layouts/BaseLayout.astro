@@ -18,7 +18,7 @@ interface Props {
 
 const { title, description, canonical, image, type, noindex, structuredData } = Astro.props;
 
-const siteUrl = import.meta.env.SITE_URL || 'https://epso.in';
+const siteUrl = import.meta.env.SITE_URL || 'https://www.epso.in';
 
 const orgSchema = {
   '@context': 'https://schema.org',
@@ -68,6 +68,7 @@ const allStructuredData = [
     <meta name="msapplication-TileColor" content="#1a202c" />
     <meta name="theme-color" content="#1a202c" />
 
+    <link rel="preload" href="/assets/fonts/Insanibc.ttf" as="font" type="font/ttf" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -84,7 +85,14 @@ const allStructuredData = [
     />
     <StructuredData data={allStructuredData} />
   </head>
-  <body>
+  <body class="min-h-screen flex flex-col relative text-brand-800 antialiased selection:bg-accent-500/20 selection:text-brand-900">
+    <!-- Awwwards-grade subtle film grain texture to eliminate banding and add tactile depth -->
+    <div
+      class="pointer-events-none fixed inset-0 z-40 opacity-[0.02] mix-blend-overlay"
+      style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"
+      aria-hidden="true"
+    ></div>
+
     <a
       href="#main-content"
       class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:btn-primary"
@@ -92,7 +100,7 @@ const allStructuredData = [
       Skip to content
     </a>
     <Header />
-    <main id="main-content">
+    <main id="main-content" class="flex-1">
       <slot />
     </main>
     <Footer />

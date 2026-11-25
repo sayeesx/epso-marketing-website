@@ -6,23 +6,54 @@ interface Props {
   categories: Category[];
   heading?: string;
 }
-const { categories, heading = 'What we make' } = Astro.props;
+const { categories = [], heading = 'What we make' } = Astro.props;
+
+// Locate existing category data if present, or use defaults
+const foodCategory = categories.find((c) => {
+  const slug = typeof c.slug === 'string' ? c.slug : c.slug?.current;
+  return slug === 'food' || c.name.toLowerCase().includes('food');
+});
+
+const homeCareCategory = categories.find((c) => {
+  const slug = typeof c.slug === 'string' ? c.slug : c.slug?.current;
+  return slug === 'home-care' || c.name.toLowerCase().includes('home');
+});
+
+// Strictly display only these two cards: Food Products and Home Care
+const displayCards: Category[] = [
+  {
+    _id: foodCategory?._id || 'food-products',
+    _type: 'category',
+    name: 'Food Products',
+    slug: { _type: 'slug', current: 'food' },
+    description: foodCategory?.description?.replace(/nuts/gi, 'biscuits') || 'Kerala mixtures, snacks, biscuits and more.',
+    imageUrl: '/epso_food_product.webp',
+  },
+  {
+    _id: homeCareCategory?._id || 'home-care',
+    _type: 'category',
+    name: 'Home Care',
+    slug: { _type: 'slug', current: 'home-care' },
+    description: homeCareCategory?.description || 'Dishwashing, floor cleaners and household cleaning products.',
+    imageUrl: '/epso_home_care.webp',
+  },
+];
 ---
-<section class="section-pad bg-white">
+<section class="pt-4 sm:pt-6 md:pt-8 pb-12 md:pb-16 lg:pb-20 bg-transparent">
   <div class="container-site">
-    <div class="mb-8 text-center">
+    <div class="mb-10 text-center">
       <h2 class="section-title">{heading}</h2>
       <p class="section-subtitle mx-auto max-w-xl mt-2">
-        From snacks to cleaning products — find the right Epso product for your home.
+        Everyday snacks and home care from Epso.
       </p>
     </div>
-    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {categories.map((cat) => (
-        <CategoryCard category={cat} />
+    <!-- Only show these two cards, perfectly centered -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto justify-items-center">
+      {displayCards.map((cat) => (
+        <div class="w-full">
+          <CategoryCard category={cat} />
+        </div>
       ))}
-    </div>
-    <div class="mt-8 text-center">
-      <a href="/category/" class="btn-secondary">See all categories</a>
     </div>
   </div>
 </section>

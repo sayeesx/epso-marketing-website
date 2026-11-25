@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /studio/
+Disallow: /admin/
 
-Sitemap: https://epso.in/sitemap-index.xml
+Sitemap: https://www.epso.in/sitemap-index.xml
 

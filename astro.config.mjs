@@ -4,13 +4,13 @@ import sitemap from '@astrojs/sitemap';
 import path from 'path';
 
 export default defineConfig({
-  site: 'https://epso.in',
+  site: 'https://www.epso.in',
   integrations: [
     tailwind({
       applyBaseStyles: false,
     }),
     sitemap({
-      filter: (page) => !page.includes('/studio'),
+      filter: (page) => !page.includes('/studio') && !page.includes('/admin'),
     }),
   ],
   output: 'static',

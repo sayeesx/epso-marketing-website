@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/seo/Breadcrumbs.astro';
 import SanityImage from '../../components/ui/SanityImage.astro';
+import ArrowButton from '@components/ui/ArrowButton.astro';
 import { sanityClient, sanityImageUrl } from '../../lib/sanity';
 import { getBlogPostBySlugQuery, getAllBlogSlugsQuery } from '../../lib/queries';
 import type { BlogPost } from '../../types/index';
@@ -28,7 +29,7 @@ if (!post) {
   return Astro.redirect('/404');
 }
 
-const siteUrl = import.meta.env.SITE_URL || 'https://epso.in';
+const siteUrl = import.meta.env.SITE_URL || 'https://www.epso.in';
 const postImageUrl = post.mainImage?.asset?._ref
   ? sanityImageUrl(post.mainImage, { width: 1200, height: 630 })
   : `${siteUrl}/assets/banners/hero-placeholder.svg`;
@@ -73,16 +74,16 @@ const breadcrumbs = [
             })}
           </time>
         )}
-        <h1 class="mt-2 mb-6 text-brand-800">{post.title}</h1>
+        <h1 class="mt-2 mb-6 text-brand-900 tracking-tight">{post.title}</h1>
         {post.mainImage && (
-          <div class="mb-8 aspect-video overflow-hidden rounded-xl bg-brand-50">
+          <div class="mb-8 aspect-video overflow-hidden rounded-2xl border border-white/80 bg-white/70 backdrop-blur-md p-2 shadow-glass">
             <SanityImage
               image={post.mainImage}
               alt={post.title}
               width={800}
               height={450}
               loading="eager"
-              class="h-full w-full object-cover"
+              class="h-full w-full object-cover rounded-xl"
             />
           </div>
         )}
@@ -95,6 +96,12 @@ const breadcrumbs = [
           <p class="text-brand-400 text-sm italic border border-brand-100 rounded p-4">
             [Article body — install @portabletext/astro and configure PortableText renderer to display full content]
           </p>
+        </div>
+        <div class="mt-10 pt-6 border-t border-brand-200">
+          <a href="/blog/" class="group btn-secondary inline-flex items-center gap-2 pl-2">
+            <ArrowButton as="span" direction="left" size="sm" color="#1a202c" hoverColor="#eb8d35" />
+            <span>Back to blog</span>
+          </a>
         </div>
       </article>
     </div>

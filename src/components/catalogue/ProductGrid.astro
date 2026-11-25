@@ -1,6 +1,7 @@
 ---
 import type { Product } from '../../types/index';
 import ProductCard from '../ui/ProductCard.astro';
+import PhosphorIcon from '../ui/PhosphorIcon.astro';
 
 interface Props {
   products: Product[];
@@ -16,7 +17,9 @@ const { products, emptyMessage = 'No products found.' } = Astro.props;
   </div>
 ) : (
   <div class="py-16 text-center">
-    <div class="mb-3 text-4xl" aria-hidden="true">📦</div>
+    <div class="mb-3 flex justify-center text-brand-400" aria-hidden="true">
+      <PhosphorIcon name="package" size={48} />
+    </div>
     <p class="text-brand-500">{emptyMessage}</p>
     <a href="/products/" class="btn-secondary mt-4 inline-block">View all products</a>
   </div>

@@ -21,7 +21,7 @@ const {
 } = Astro.props;
 
 const siteName = 'Epso';
-const siteUrl = import.meta.env.SITE_URL || 'https://epso.in';
+const siteUrl = import.meta.env.SITE_URL || 'https://www.epso.in';
 const pageTitle = title ? `${title} | ${siteName}` : `${siteName} – Everyday Products for Every Home`;
 const canonicalUrl = canonical || new URL(Astro.url.pathname, siteUrl).href;
 

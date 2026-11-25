@@ -1,6 +1,7 @@
 ---
 import type { Product } from '../../types/index';
 import SanityImage from './SanityImage.astro';
+import ArrowButton from './ArrowButton.astro';
 
 interface Props {
   product: Product;
@@ -10,36 +11,37 @@ const slug = typeof product.slug === 'string' ? product.slug : product.slug?.cur
 ---
 <article class="card group flex flex-col overflow-hidden">
   <a href={`/products/${slug}/`} class="block overflow-hidden" tabindex="-1" aria-hidden="true">
-    <div class="aspect-square overflow-hidden bg-brand-50">
+    <div class="m-2.5 aspect-square overflow-hidden rounded-xl bg-white/70 border border-white/50 relative">
       <SanityImage
         image={product.mainImage}
         alt={product.mainImage?.alt || product.name}
         width={400}
         height={400}
-        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         placeholderSrc="/assets/products/product-placeholder.svg"
       />
     </div>
   </a>
-  <div class="flex flex-1 flex-col p-4">
+  <div class="flex flex-1 flex-col p-4 pt-2">
     {product.category && (
-      <span class="mb-1 text-xs font-medium uppercase tracking-wide text-brand-500">
+      <span class="mb-1.5 inline-block text-[11px] font-semibold uppercase tracking-wider text-amber-900 bg-amber-500/15 px-2.5 py-0.5 rounded-full w-fit">
         {product.category.name}
       </span>
     )}
-    <h3 class="mb-2 text-base font-semibold text-brand-800 leading-snug">
+    <h3 class="mb-2 text-base font-semibold text-brand-900 leading-snug group-hover:text-[#eb8d35] transition-colors">
       <a
         href={`/products/${slug}/`}
-        class="hover:text-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:rounded focus-visible:outline-accent-500"
+        class="focus-visible:outline focus-visible:outline-2 focus-visible:rounded focus-visible:outline-accent-500"
       >
         {product.name}
       </a>
     </h3>
     {product.shortDescription && (
-      <p class="mb-4 flex-1 text-sm text-brand-500 line-clamp-2">{product.shortDescription}</p>
+      <p class="mb-4 flex-1 text-sm text-brand-600 line-clamp-2 leading-relaxed">{product.shortDescription}</p>
     )}
-    <a href={`/products/${slug}/`} class="btn-secondary mt-auto text-sm">
-      View details
+    <a href={`/products/${slug}/`} class="mt-auto inline-flex items-center justify-between pt-2 text-xs font-bold uppercase tracking-wider text-brand-900 group-hover:text-[#eb8d35] transition-colors">
+      <span>View details</span>
+      <ArrowButton as="span" direction="right" size="sm" color="#0f1420" hoverColor="#eb8d35" />
     </a>
   </div>
 </article>

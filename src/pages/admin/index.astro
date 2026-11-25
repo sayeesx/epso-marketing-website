@@ -1,0 +1,8 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+
+const studioIndexPath = path.resolve(process.cwd(), 'src/pages/admin/_studio.html');
+const html = fs.readFileSync(studioIndexPath, 'utf-8');
+---
+<Fragment set:html={html} />
