@@ -1,13 +1,9 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
-
-const projectId = import.meta.env.SANITY_PROJECT_ID || 'scsgz7wt';
-const dataset = import.meta.env.SANITY_DATASET || 'production';
-const apiVersion = import.meta.env.SANITY_API_VERSION || '2024-01-01';
 ---
 <BaseLayout
   title="Product Admin"
-  description="Simple Epso product upload and management dashboard backed by Sanity CMS."
+  description="Epso product upload and management dashboard backed by Sanity CMS."
   noindex={true}
 >
   <div class="section-pad bg-white">
@@ -17,18 +13,12 @@ const apiVersion = import.meta.env.SANITY_API_VERSION || '2024-01-01';
         <div>
           <h1 class="text-2xl sm:text-3xl font-bold text-brand-950">Epso Product Admin</h1>
           <p class="mt-1 text-sm text-brand-600">
-            Upload, edit, and publish products directly to Sanity (<code class="rounded bg-brand-100 px-1.5 py-0.5 text-xs">{projectId} / {dataset}</code>).
+            Upload, edit, and manage products stored in Sanity CMS.
           </p>
         </div>
 
         <div id="admin-topbar-actions" class="hidden flex-wrap items-center gap-3">
-          <button
-            id="btn-deploy-site"
-            type="button"
-            class="btn-accent text-xs px-4 py-2"
-          >
-            Publish Live Site
-          </button>
+          <span id="admin-user-label" class="text-xs font-medium text-brand-600"></span>
           <button
             id="btn-sign-out"
             type="button"
@@ -42,61 +32,45 @@ const apiVersion = import.meta.env.SANITY_API_VERSION || '2024-01-01';
       <!-- Global feedback banner -->
       <div id="admin-toast" class="hidden mb-6 rounded-2xl border px-4 py-3 text-sm font-medium" role="status" aria-live="polite"></div>
 
-      <!-- STEP 1: SANITY AUTH VIEW -->
-      <div id="admin-login-view" class="mx-auto max-w-lg rounded-3xl border border-brand-200 bg-white p-6 sm:p-8">
-        <h2 class="text-xl font-bold text-brand-950 mb-2">Connect Sanity Backend</h2>
-        <p class="text-sm text-brand-600 mb-6 leading-relaxed">
-          Enter your Sanity API token with <strong>Editor</strong> permissions to upload images and manage products securely from this browser.
+      <!-- STEP 1: EMAIL & PASSWORD SIGN IN -->
+      <div id="admin-login-view" class="mx-auto max-w-md rounded-3xl border border-brand-200 bg-white p-6 sm:p-8">
+        <h2 class="text-xl font-bold text-brand-950 mb-2">Admin Sign In</h2>
+        <p class="text-sm text-brand-600 mb-6">
+          Sign in with your Epso admin credentials to manage products.
         </p>
 
         <form id="login-form" class="space-y-4">
           <div>
-            <label for="sanity-token-input" class="block text-sm font-semibold text-brand-900 mb-1.5">
-              Sanity API Write Token
+            <label for="login-email" class="block text-sm font-semibold text-brand-900 mb-1.5">
+              Email
             </label>
             <input
-              id="sanity-token-input"
-              type="password"
+              id="login-email"
+              type="text"
+              inputmode="email"
               required
-              autocomplete="off"
-              placeholder="sk..."
+              autocomplete="username"
+              placeholder="Enter email"
               class="w-full rounded-xl border border-brand-300 bg-white px-4 py-2.5 text-sm text-brand-950 focus:border-[#eb8d35] focus:outline-none"
             />
-            <p class="mt-2 text-xs text-brand-500">
-              Need a token?
-              <a
-                href={`https://www.sanity.io/manage/project/${projectId}/api#tokens`}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="font-semibold text-[#eb8d35] hover:underline"
-              >
-                Create an Editor token in Sanity Manage →
-              </a>
-            </p>
           </div>
 
           <div>
-            <label for="deploy-hook-input" class="block text-sm font-semibold text-brand-900 mb-1.5">
-              Cloudflare Deploy Hook URL <span class="font-normal text-brand-400">(optional)</span>
+            <label for="login-password" class="block text-sm font-semibold text-brand-900 mb-1.5">
+              Password
             </label>
             <input
-              id="deploy-hook-input"
-              type="url"
-              placeholder="https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/..."
+              id="login-password"
+              type="password"
+              required
+              autocomplete="current-password"
+              placeholder="Enter password"
               class="w-full rounded-xl border border-brand-300 bg-white px-4 py-2.5 text-sm text-brand-950 focus:border-[#eb8d35] focus:outline-none"
             />
-            <p class="mt-1 text-xs text-brand-500">
-              Allows 1-click live site rebuilds on Cloudflare Pages after uploading products.
-            </p>
           </div>
 
-          <label class="flex items-center gap-2 text-sm text-brand-700 cursor-pointer select-none">
-            <input id="remember-token" type="checkbox" checked class="rounded border-brand-300 text-[#eb8d35] focus:ring-[#eb8d35]" />
-            <span>Remember on this browser</span>
-          </label>
-
           <button id="btn-connect" type="submit" class="btn-primary w-full py-3 text-sm font-semibold">
-            Connect to Sanity
+            Sign in
           </button>
         </form>
       </div>
@@ -271,7 +245,7 @@ const apiVersion = import.meta.env.SANITY_API_VERSION || '2024-01-01';
                     id="prod-ingredients"
                     rows="2"
                     placeholder="Optional (for food)"
-                    class="w-full rounded-xl border border-brand-300 bg-white px-3 py-2 text-xs text-brand-950 focus:border-[#eb8d35] focus:outline-none"
+                    class="w-full rounded-xl border border-brand-300 bg-white px-3.5 py-2 text-xs text-brand-950 focus:border-[#eb8d35] focus:outline-none"
                   ></textarea>
                 </div>
                 <div>
@@ -282,7 +256,7 @@ const apiVersion = import.meta.env.SANITY_API_VERSION || '2024-01-01';
                     id="prod-usage"
                     rows="2"
                     placeholder="Optional (for home care)"
-                    class="w-full rounded-xl border border-brand-300 bg-white px-3 py-2 text-xs text-brand-950 focus:border-[#eb8d35] focus:outline-none"
+                    class="w-full rounded-xl border border-brand-300 bg-white px-3.5 py-2 text-xs text-brand-950 focus:border-[#eb8d35] focus:outline-none"
                   ></textarea>
                 </div>
               </div>
@@ -323,29 +297,12 @@ const apiVersion = import.meta.env.SANITY_API_VERSION || '2024-01-01';
               <p class="py-12 text-center text-sm text-brand-400">Loading products from Sanity...</p>
             </div>
           </div>
-
-          <div class="mt-4 rounded-2xl border border-amber-200 bg-amber-50/70 p-4 text-xs text-amber-900 leading-relaxed">
-            <strong>Note on static site updates:</strong> Products upload immediately into Sanity CMS. If you configured a Cloudflare Deploy Hook, click <strong>Publish Live Site</strong> above after making edits so Cloudflare Pages rebuilds the static pages with your new products.
-          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Admin client logic (connects directly to Sanity API using the user's provided token) -->
-  <script define:vars={{ projectId, dataset, apiVersion }} is:inline>
-    window.__EPSO_SANITY_CFG__ = { projectId, dataset, apiVersion };
-  </script>
-
   <script>
-    import { createClient, type SanityClient } from '@sanity/client';
-
-    interface AdminConfig {
-      projectId: string;
-      dataset: string;
-      apiVersion: string;
-    }
-
     interface SizeEntry {
       _key?: string;
       size: string;
@@ -380,27 +337,20 @@ const apiVersion = import.meta.env.SANITY_API_VERSION || '2024-01-01';
       slug?: string;
     }
 
-    const cfg = (window as unknown as { __EPSO_SANITY_CFG__: AdminConfig }).__EPSO_SANITY_CFG__;
-    const TOKEN_KEY = 'epso_sanity_write_token';
-    const HOOK_KEY = 'epso_cf_deploy_hook';
-
-    let client: SanityClient | null = null;
     let categories: AdminCategory[] = [];
     let products: AdminProduct[] = [];
 
-    // DOM Elements
     const loginView = document.getElementById('admin-login-view') as HTMLElement | null;
     const dashboardView = document.getElementById('admin-dashboard-view') as HTMLElement | null;
     const topbarActions = document.getElementById('admin-topbar-actions') as HTMLElement | null;
+    const userLabel = document.getElementById('admin-user-label') as HTMLElement | null;
     const toastEl = document.getElementById('admin-toast') as HTMLElement | null;
 
     const loginForm = document.getElementById('login-form') as HTMLFormElement | null;
-    const tokenInput = document.getElementById('sanity-token-input') as HTMLInputElement | null;
-    const deployHookInput = document.getElementById('deploy-hook-input') as HTMLInputElement | null;
-    const rememberCheckbox = document.getElementById('remember-token') as HTMLInputElement | null;
+    const emailInput = document.getElementById('login-email') as HTMLInputElement | null;
+    const passwordInput = document.getElementById('login-password') as HTMLInputElement | null;
     const btnConnect = document.getElementById('btn-connect') as HTMLButtonElement | null;
     const btnSignOut = document.getElementById('btn-sign-out') as HTMLButtonElement | null;
-    const btnDeploySite = document.getElementById('btn-deploy-site') as HTMLButtonElement | null;
 
     const productForm = document.getElementById('product-form') as HTMLFormElement | null;
     const formHeading = document.getElementById('form-heading') as HTMLElement | null;
@@ -459,17 +409,37 @@ const apiVersion = import.meta.env.SANITY_API_VERSION || '2024-01-01';
       return Math.random().toString(36).slice(2, 10);
     }
 
-    function getStoredToken(): string | null {
-      return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
+    async function apiCall<T>(action: string, options: RequestInit = {}): Promise<T> {
+      const res = await fetch(`/api/admin?action=${encodeURIComponent(action)}`, {
+        credentials: 'same-origin',
+        ...options,
+      });
+      const data = (await res.json()) as T & { error?: string };
+      if (!res.ok) {
+        if (res.status === 401 && action !== 'login' && action !== 'session') {
+          showLoginView();
+        }
+        throw new Error(data.error || `Request failed (${res.status})`);
+      }
+      return data;
     }
 
-    function saveToken(token: string, remember: boolean) {
-      localStorage.removeItem(TOKEN_KEY);
-      sessionStorage.removeItem(TOKEN_KEY);
-      if (remember) {
-        localStorage.setItem(TOKEN_KEY, token);
-      } else {
-        sessionStorage.setItem(TOKEN_KEY, token);
+    function showLoginView() {
+      dashboardView?.classList.add('hidden');
+      dashboardView?.classList.remove('grid');
+      topbarActions?.classList.add('hidden');
+      topbarActions?.classList.remove('flex');
+      loginView?.classList.remove('hidden');
+    }
+
+    function showDashboardView(email?: string) {
+      loginView?.classList.add('hidden');
+      dashboardView?.classList.remove('hidden');
+      dashboardView?.classList.add('grid');
+      topbarActions?.classList.remove('hidden');
+      topbarActions?.classList.add('flex');
+      if (userLabel && email) {
+        userLabel.textContent = email;
       }
     }
 
@@ -530,39 +500,15 @@ const apiVersion = import.meta.env.SANITY_API_VERSION || '2024-01-01';
     });
 
     async function loadData() {
-      if (!client) return;
       try {
-        const [cats, prods] = await Promise.all([
-          client.fetch<AdminCategory[]>(
-            `*[_type == "category"] | order(name asc) { _id, name, "slug": slug.current }`
-          ),
-          client.fetch<AdminProduct[]>(
-            `*[_type == "product"] | order(_createdAt desc) {
-              _id,
-              name,
-              slug,
-              isPublished,
-              isFeatured,
-              "category": category->{ _id, name },
-              mainImage,
-              "imageUrl": mainImage.asset->url,
-              shortDescription,
-              description,
-              packagingSizes,
-              features,
-              ingredients,
-              usageInstructions
-            }`
-          ),
-        ]);
-
-        categories = cats || [];
-        products = prods || [];
+        const res = await apiCall<{ categories: AdminCategory[]; products: AdminProduct[] }>('data');
+        categories = res.categories || [];
+        products = res.products || [];
         renderCategories();
         renderProducts();
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Failed to load data from Sanity.';
-        showToast(`Sanity error: ${msg}. Make sure this origin is added to Sanity CORS origins.`, 'error');
+        showToast(msg, 'error');
       }
     }
 
@@ -680,70 +626,48 @@ const apiVersion = import.meta.env.SANITY_API_VERSION || '2024-01-01';
     }
 
     async function togglePublish(p: AdminProduct) {
-      if (!client) return;
       try {
-        await client.patch(p._id).set({ isPublished: !p.isPublished }).commit();
+        await apiCall('togglePublish', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: p._id, isPublished: !p.isPublished }),
+        });
         showToast(`${p.name} is now ${!p.isPublished ? 'published' : 'set to draft'}.`, 'success');
         await loadData();
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Update failed';
-        showToast(`Could not update product: ${msg}`, 'error');
+        showToast(err instanceof Error ? err.message : 'Update failed', 'error');
       }
     }
 
     async function deleteProduct(p: AdminProduct) {
-      if (!client) return;
       if (!window.confirm(`Delete "${p.name}" permanently from Sanity?`)) return;
       try {
-        await client.delete(p._id);
+        await apiCall('deleteProduct', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: p._id }),
+        });
         showToast(`Deleted "${p.name}".`, 'success');
         if (editingIdInput?.value === p._id) resetForm();
         await loadData();
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Delete failed';
-        showToast(`Could not delete product: ${msg}`, 'error');
+        showToast(err instanceof Error ? err.message : 'Delete failed', 'error');
       }
     }
 
     btnQuickCategories?.addEventListener('click', async () => {
-      if (!client) return;
       btnQuickCategories.disabled = true;
       try {
-        const hasFood = categories.some((c) => c.slug === 'food' || c.name.toLowerCase().includes('food'));
-        const hasHome = categories.some((c) => c.slug === 'home-care' || c.name.toLowerCase().includes('home'));
-        const ops: Promise<unknown>[] = [];
-        if (!hasFood) {
-          ops.push(
-            client.create({
-              _type: 'category',
-              name: 'Food Products',
-              slug: { _type: 'slug', current: 'food' },
-              description: 'Kerala mixtures, snacks, biscuits and more.',
-              displayOrder: 1,
-            })
-          );
-        }
-        if (!hasHome) {
-          ops.push(
-            client.create({
-              _type: 'category',
-              name: 'Home Care',
-              slug: { _type: 'slug', current: 'home-care' },
-              description: 'Dishwashing, floor cleaners and household cleaning products.',
-              displayOrder: 2,
-            })
-          );
-        }
-        if (ops.length === 0) {
-          showToast('Food Products and Home Care categories already exist.', 'info');
-        } else {
-          await Promise.all(ops);
-          showToast('Created missing categories in Sanity!', 'success');
-          await loadData();
-        }
+        const res = await apiCall<{ created: number }>('ensureCategories', { method: 'POST' });
+        showToast(
+          res.created > 0
+            ? 'Created Food Products & Home Care categories in Sanity!'
+            : 'Food Products and Home Care categories already exist.',
+          res.created > 0 ? 'success' : 'info'
+        );
+        await loadData();
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Failed';
-        showToast(`Could not create categories: ${msg}`, 'error');
+        showToast(err instanceof Error ? err.message : 'Failed', 'error');
       } finally {
         btnQuickCategories.disabled = false;
       }
@@ -751,7 +675,7 @@ const apiVersion = import.meta.env.SANITY_API_VERSION || '2024-01-01';
 
     productForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (!client || !btnSaveProduct) return;
+      if (!btnSaveProduct) return;
 
       const name = nameInput?.value.trim() || '';
       const slugVal = slugify(slugInput?.value || name);
@@ -768,11 +692,13 @@ const apiVersion = import.meta.env.SANITY_API_VERSION || '2024-01-01';
         let imageAssetRef = existingImgRefInput?.value || '';
         const newFile = imageInput?.files?.[0];
         if (newFile) {
-          const uploadedAsset = await client.assets.upload('image', newFile, {
-            filename: newFile.name,
-            contentType: newFile.type,
+          const fd = new FormData();
+          fd.append('file', newFile);
+          const uploaded = await apiCall<{ assetId?: string }>('upload', {
+            method: 'POST',
+            body: fd,
           });
-          imageAssetRef = uploadedAsset._id;
+          if (uploaded.assetId) imageAssetRef = uploaded.assetId;
         }
 
         const sizeRows = Array.from(document.querySelectorAll('.size-row'))
@@ -802,7 +728,7 @@ const apiVersion = import.meta.env.SANITY_API_VERSION || '2024-01-01';
             children: [{ _type: 'span', _key: randomKey(), text: para, marks: [] }],
           }));
 
-        const docPayload: Record<string, unknown> = {
+        const payload: Record<string, unknown> = {
           name,
           slug: { _type: 'slug', current: slugVal },
           isPublished: Boolean(publishedCheckbox?.checked),
@@ -817,11 +743,11 @@ const apiVersion = import.meta.env.SANITY_API_VERSION || '2024-01-01';
 
         const catId = categorySelect?.value;
         if (catId) {
-          docPayload.category = { _type: 'reference', _ref: catId };
+          payload.category = { _type: 'reference', _ref: catId };
         }
 
         if (imageAssetRef) {
-          docPayload.mainImage = {
+          payload.mainImage = {
             _type: 'image',
             asset: { _type: 'reference', _ref: imageAssetRef },
             alt: imageAltInput?.value.trim() || name,
@@ -829,125 +755,81 @@ const apiVersion = import.meta.env.SANITY_API_VERSION || '2024-01-01';
         }
 
         const editingId = editingIdInput?.value;
-        if (editingId) {
-          await client.patch(editingId).set(docPayload).commit();
-          showToast(`Updated "${name}" in Sanity!`, 'success');
-        } else {
-          await client.create({ _type: 'product', ...docPayload });
-          showToast(`Uploaded "${name}" to Sanity!`, 'success');
-        }
+        await apiCall('saveProduct', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ editingId: editingId || undefined, payload }),
+        });
 
+        showToast(editingId ? `Updated "${name}" in Sanity!` : `Uploaded "${name}" to Sanity!`, 'success');
         slugManuallyEdited = false;
         resetForm();
         await loadData();
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Save failed';
-        showToast(`Failed to save product: ${msg}`, 'error');
+        showToast(err instanceof Error ? err.message : 'Failed to save product.', 'error');
       } finally {
         btnSaveProduct.disabled = false;
         btnSaveProduct.textContent = originalText;
       }
     });
 
-    async function connectWithToken(token: string) {
-      const testClient = createClient({
-        projectId: cfg.projectId,
-        dataset: cfg.dataset,
-        apiVersion: cfg.apiVersion,
-        token,
-        useCdn: false,
-        ignoreBrowserTokenWarning: true,
-      });
-
-      // Verify token by reading categories/products
-      await testClient.fetch('*[_type in ["product","category"]][0..0]');
-      client = testClient;
-
-      loginView?.classList.add('hidden');
-      dashboardView?.classList.remove('hidden');
-      dashboardView?.classList.add('grid');
-      topbarActions?.classList.remove('hidden');
-      topbarActions?.classList.add('flex');
-
-      const hook = localStorage.getItem(HOOK_KEY);
-      if (btnDeploySite) {
-        btnDeploySite.style.display = hook ? 'inline-flex' : 'none';
-      }
-
-      resetForm();
-      await loadData();
-    }
-
     loginForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const token = tokenInput?.value.trim() || '';
-      if (!token) return;
+      const email = emailInput?.value.trim() || '';
+      const password = passwordInput?.value || '';
+      if (!email || !password) return;
 
       if (btnConnect) {
         btnConnect.disabled = true;
-        btnConnect.textContent = 'Connecting...';
+        btnConnect.textContent = 'Signing in...';
       }
 
       try {
-        const hook = deployHookInput?.value.trim();
-        if (hook) localStorage.setItem(HOOK_KEY, hook);
-        await connectWithToken(token);
-        saveToken(token, Boolean(rememberCheckbox?.checked));
-        showToast('Connected to Sanity CMS!', 'success');
+        const res = await apiCall<{ authenticated: boolean; email: string }>('login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        if (res.authenticated) {
+          showDashboardView(res.email);
+          resetForm();
+          await loadData();
+          showToast('Signed in.', 'success');
+        }
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Invalid token or CORS error';
-        showToast(`Could not connect: ${msg}`, 'error');
+        showToast(err instanceof Error ? err.message : 'Invalid credentials.', 'error');
       } finally {
         if (btnConnect) {
           btnConnect.disabled = false;
-          btnConnect.textContent = 'Connect to Sanity';
+          btnConnect.textContent = 'Sign in';
         }
       }
     });
 
-    btnSignOut?.addEventListener('click', () => {
-      localStorage.removeItem(TOKEN_KEY);
-      sessionStorage.removeItem(TOKEN_KEY);
-      client = null;
-      dashboardView?.classList.add('hidden');
-      dashboardView?.classList.remove('grid');
-      topbarActions?.classList.add('hidden');
-      topbarActions?.classList.remove('flex');
-      loginView?.classList.remove('hidden');
-      if (tokenInput) tokenInput.value = '';
-      showToast('Signed out.', 'info');
-    });
-
-    btnDeploySite?.addEventListener('click', async () => {
-      const hook = localStorage.getItem(HOOK_KEY);
-      if (!hook) {
-        showToast('No Cloudflare Deploy Hook URL saved.', 'info');
-        return;
-      }
-      btnDeploySite.disabled = true;
-      btnDeploySite.textContent = 'Triggering build...';
+    btnSignOut?.addEventListener('click', async () => {
       try {
-        const res = await fetch(hook, { method: 'POST' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        showToast('Cloudflare Pages rebuild triggered! Live site will update in ~1 minute.', 'success');
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Trigger failed';
-        showToast(`Deploy hook failed: ${msg}`, 'error');
-      } finally {
-        btnDeploySite.disabled = false;
-        btnDeploySite.textContent = 'Publish Live Site';
+        await apiCall('logout', { method: 'POST' });
+      } catch {
+        // Ignore
       }
+      showLoginView();
+      if (passwordInput) passwordInput.value = '';
+      showToast('Signed out.', 'info');
     });
 
     btnRefresh?.addEventListener('click', () => loadData());
 
-    // Auto-connect if token already stored in browser
-    const savedToken = getStoredToken();
-    if (savedToken) {
-      connectWithToken(savedToken).catch(() => {
-        localStorage.removeItem(TOKEN_KEY);
-        sessionStorage.removeItem(TOKEN_KEY);
+    // Check active session on page load
+    apiCall<{ authenticated: boolean; email?: string }>('session')
+      .then((res) => {
+        if (res.authenticated) {
+          showDashboardView(res.email);
+          resetForm();
+          loadData();
+        }
+      })
+      .catch(() => {
+        showLoginView();
       });
-    }
   </script>
 </BaseLayout>

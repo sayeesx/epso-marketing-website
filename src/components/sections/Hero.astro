@@ -37,9 +37,12 @@ const {
     </h1>
   </div>
 
-  <!-- 3D TRUCK ON GLOBE: FULL WIDTH OF SCREEN ACROSS PORTRAIT & LANDSCAPE (shifted slightly down) -->
+  <!-- 3D TRUCK ON GLOBE: FULL WIDTH OF SCREEN ACROSS PORTRAIT & LANDSCAPE (shifted slightly down, bottom slightly cropped) -->
   <div class="relative z-10 w-full px-0 mt-2 sm:mt-1 md:-mt-2 lg:-mt-4 flex flex-col items-center overflow-hidden">
-    <div class="w-full flex justify-center animate-float will-change-transform">
+    <div
+      class="w-full flex justify-center animate-float will-change-transform -mb-[6%]"
+      style="clip-path: inset(0 0 8% 0);"
+    >
       <img
         src={imageSrc}
         alt={imageAlt}
@@ -53,7 +56,7 @@ const {
     </div>
 
     <!-- Marketplace availability badge & quick action buttons shifted higher onto the hero globe -->
-    <div class="relative z-30 -mt-24 sm:-mt-40 md:-mt-56 lg:-mt-72 pb-12 sm:pb-24 md:pb-32 lg:pb-40 flex flex-col items-center gap-3 px-4">
+    <div class="relative z-30 -mt-20 sm:-mt-32 md:-mt-44 lg:-mt-56 pb-10 sm:pb-16 md:pb-24 lg:pb-28 flex flex-col items-center gap-3 px-4">
       <div class="inline-flex flex-col sm:flex-row items-center gap-2 sm:gap-3 rounded-2xl sm:rounded-full border border-white/80 bg-white/85 px-4 sm:px-5 py-1.5 sm:py-2 backdrop-blur-md transition-colors duration-300 hover:bg-white">
         <span class="text-xs font-semibold tracking-wide text-brand-900/90 whitespace-nowrap">
           Available now on
@@ -104,9 +107,10 @@ const {
     </div>
   </div>
 
-  <!-- Clean soft bottom-edge fade into white page when hero is at rest -->
+  <!-- Ultra-smooth multi-stop eased bottom-edge fade into white page -->
   <div
-    class="pointer-events-none absolute bottom-0 inset-x-0 z-20 h-14 sm:h-20 bg-gradient-to-t from-white via-white/80 to-transparent"
+    class="pointer-events-none absolute bottom-0 inset-x-0 z-20 h-32 sm:h-44 md:h-52"
+    style="background: linear-gradient(to top, #ffffff 0%, rgba(255,255,255,0.96) 14%, rgba(255,255,255,0.82) 32%, rgba(255,255,255,0.52) 55%, rgba(255,255,255,0.18) 78%, rgba(255,255,255,0) 100%);"
     aria-hidden="true"
   ></div>
 </section>
