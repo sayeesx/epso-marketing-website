@@ -114,11 +114,12 @@ const {
 <!-- SCROLL-ONLY THREE.JS VOLUMETRIC SMOKE EFFECT (Animates smoothly only while scrolling) -->
 <div
   id="hero-smoke-container"
-  class="pointer-events-none fixed inset-0 z-[45] w-full h-full overflow-hidden opacity-0 invisible"
+  class="pointer-events-none fixed inset-0 z-[45] w-full h-full overflow-hidden"
+  style="opacity: 0; visibility: hidden;"
   aria-hidden="true"
 ></div>
 
-<!-- Three.js WebGL FBM Volumetric Smoke Shader (MIT open-source library, renders only during scroll) -->
+<!-- Three.js WebGL FBM Volumetric Smoke Shader (MIT open-source library, renders during hero scroll) -->
 <script>
   import * as THREE from 'three';
 
@@ -157,7 +158,7 @@ const {
       uResolution: { value: new THREE.Vector2(1, 1) },
       uTime: { value: 0 },
       uScroll: { value: 0 },
-      uActivity: { value: 0 },
+      uVisibility: { value: 0 },
     };
 
     const vertexShader = `
@@ -166,13 +167,13 @@ const {
       }
     `;
 
-    // 6-octave FBM with domain warping & atmospheric smoke contrast (active only on scroll)
+    // 6-octave FBM with two-stage domain warping & clear volumetric smoke contrast
     const fragmentShader = `
       precision highp float;
       uniform vec2 uResolution;
       uniform float uTime;
       uniform float uScroll;
-      uniform float uActivity;
+      uniform float uVisibility;
 
       float hash(vec2 p) {
         p = fract(p * vec2(123.34, 456.21));
@@ -206,18 +207,18 @@ const {
 
       float smokeDensity(vec2 uv, float t, float s) {
         float aspect = uResolution.x / max(uResolution.y, 1.0);
-        vec2 p = vec2(uv.x * aspect, uv.y) * 2.35;
+        vec2 p = vec2(uv.x * aspect, uv.y) * 2.1;
 
-        // Swirl driven directly by scroll displacement + gentle upward smoke flow
-        vec2 drift = vec2(t * 0.06 + s * 0.45, -t * 0.08 - s * 1.15);
+        // Billowing swirl driven by scroll progress + active smoke time
+        vec2 drift = vec2(t * 0.08 + s * 0.65, -t * 0.10 - s * 1.45);
 
         vec2 q = vec2(
           fbm(p + drift * 0.7),
-          fbm(p + vec2(5.2, 1.3) + drift * 0.5)
+          fbm(p + vec2(5.2, 1.3) + drift * 0.55)
         );
         vec2 r = vec2(
-          fbm(p + 2.1 * q + vec2(1.7, 9.2) + drift * 1.1),
-          fbm(p + 2.1 * q + vec2(8.3, 2.8) + drift * 0.9)
+          fbm(p + 2.0 * q + vec2(1.7, 9.2) + drift * 1.1),
+          fbm(p + 2.0 * q + vec2(8.3, 2.8) + drift * 0.9)
         );
         return fbm(p + 1.85 * r + drift * 0.4);
       }
@@ -227,28 +228,29 @@ const {
         float y = uv.y;
 
         float n = smokeDensity(uv, uTime, uScroll);
-        float nLight = smokeDensity(uv + vec2(0.0, 0.025), uTime, uScroll);
-        float scatter = clamp((n - nLight) * 4.2, -0.35, 0.75);
+        float nLight = smokeDensity(uv + vec2(0.0, 0.028), uTime, uScroll);
+        float scatter = clamp((n - nLight) * 4.5, -0.35, 0.80);
 
-        // Smoke surges upward with scroll then opens outward from center like a parting curtain
+        // Remap FBM range (~0.24..0.64) to full 0..1 smoke density
+        float density = smoothstep(0.24, 0.62, n);
+
+        // Curtain rises across viewport on scroll, then parts smoothly from center
         float expand = smoothstep(0.0, 0.35, uScroll);
-        float part   = smoothstep(0.50, 1.0, uScroll);
+        float part   = smoothstep(0.60, 1.0, uScroll);
 
-        // Airy smoke wisps (not an opaque white wall) with soft screen-edge fade
-        float edgeFade = smoothstep(0.0, 0.14, y) * smoothstep(1.0, 0.78, y);
+        float edgeFade = smoothstep(0.0, 0.10, y) * smoothstep(1.0, 0.82, y);
         float centerDist = abs(uv.x - 0.5) * 2.0;
-        float partMask = mix(1.0, smoothstep(0.0, 0.95, centerDist + (1.0 - part) * 0.55 - 0.30), part);
+        float partMask = mix(1.0, smoothstep(0.0, 0.90, centerDist + (1.0 - part) * 0.60 - 0.25), part);
 
-        float smokeWisp = smoothstep(0.36, 0.80, n + expand * 0.14);
-        float alpha = clamp(smokeWisp * edgeFade * partMask * uActivity * 0.72, 0.0, 0.72);
+        float alpha = clamp(density * (0.65 + expand * 0.35) * edgeFade * partMask * uVisibility * 0.88, 0.0, 0.88);
 
-        // Visible volumetric contrast: warm ivory highlights + soft mist gray-taupe shadows
-        vec3 sunCrest    = vec3(1.000, 0.992, 0.975);
-        vec3 smokeMid    = vec3(0.940, 0.905, 0.865);
-        vec3 smokeShadow = vec3(0.820, 0.745, 0.675);
+        // Visible volumetric contrast: sunlit ivory crests + warm mist + soft amber-gray shadows
+        vec3 sunCrest    = vec3(1.000, 0.990, 0.970);
+        vec3 smokeMid    = vec3(0.925, 0.885, 0.840);
+        vec3 smokeShadow = vec3(0.760, 0.675, 0.600);
 
-        vec3 col = mix(sunCrest, smokeMid, smoothstep(0.30, 0.75, n));
-        col = mix(col, smokeShadow, clamp(scatter, 0.0, 0.55));
+        vec3 col = mix(sunCrest, smokeMid, smoothstep(0.25, 0.62, n));
+        col = mix(col, smokeShadow, clamp(scatter, 0.0, 0.60));
 
         gl_FragColor = vec4(col, alpha);
       }
@@ -281,64 +283,66 @@ const {
     resizeObserver.observe(container);
 
     let lastScrollY = window.scrollY;
-    let targetActivity = 0;
-    let currentActivity = 0;
+    let scrollBoost = 0;
     let smokeTime = 0;
-    let scrollIdleTimer: number | undefined;
     let rafId = 0;
     let lastFrameTime = performance.now();
 
-    function onScroll() {
+    function smoothstep(edge0: number, edge1: number, x: number) {
+      const t = Math.min(Math.max((x - edge0) / (edge1 - edge0), 0), 1);
+      return t * t * (3 - 2 * t);
+    }
+
+    function updateState() {
       const y = window.scrollY;
       const delta = Math.abs(y - lastScrollY);
       lastScrollY = y;
 
       const heroH = hero?.offsetHeight || 750;
-      const progress = Math.min(Math.max(y / heroH, 0), 1);
+      const progress = Math.min(Math.max(y / (heroH * 1.15), 0), 1);
       uniforms.uScroll.value = progress;
 
-      // Only activate smoke while actively scrolling inside/past the hero zone (not at rest at top)
-      if (y > 4 && progress < 0.98 && delta > 0) {
-        targetActivity = Math.min(1, 0.55 + Math.min(delta / 40, 0.45));
-        smokeTime += delta * 0.008;
-        if (scrollIdleTimer) window.clearTimeout(scrollIdleTimer);
-        scrollIdleTimer = window.setTimeout(() => {
-          targetActivity = 0;
-        }, 450);
-      } else if (y <= 4 || progress >= 0.98) {
-        targetActivity = 0;
+      if (delta > 0) {
+        scrollBoost = Math.min(2.5, scrollBoost + delta * 0.025);
+        smokeTime += delta * 0.006;
       }
 
-      if ((targetActivity > 0 || currentActivity > 0.01) && !rafId) {
-        lastFrameTime = performance.now();
-        rafId = requestAnimationFrame(animate);
+      // Hidden at top rest (y <= 6) and once scrolled past hero transition (progress >= 1.0)
+      const fadeIn = smoothstep(0.01, 0.14, progress);
+      const fadeOut = 1 - smoothstep(0.72, 1.0, progress);
+      const vis = y <= 6 ? 0 : fadeIn * fadeOut;
+
+      uniforms.uVisibility.value = vis;
+
+      if (vis > 0.005) {
+        container!.style.visibility = 'visible';
+        container!.style.opacity = '1';
+        if (!rafId) {
+          lastFrameTime = performance.now();
+          rafId = requestAnimationFrame(animate);
+        }
+      } else {
+        container!.style.opacity = '0';
+        container!.style.visibility = 'hidden';
       }
     }
 
-    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('scroll', updateState, { passive: true });
+    updateState();
 
     function animate(now: number) {
       const dt = Math.min((now - lastFrameTime) * 0.001, 0.05);
       lastFrameTime = now;
 
-      // Smoothly ramp activity in when scrolling, and gently dissipate when stopped
-      const lerpRate = targetActivity > currentActivity ? 8.0 : 2.6;
-      currentActivity += (targetActivity - currentActivity) * Math.min(1, dt * lerpRate);
-
-      if (currentActivity <= 0.005 && targetActivity === 0) {
-        currentActivity = 0;
-        uniforms.uActivity.value = 0;
-        container!.style.opacity = '0';
-        container!.style.visibility = 'hidden';
+      if (uniforms.uVisibility.value <= 0.005) {
         rafId = 0;
         return;
       }
 
-      container!.style.visibility = 'visible';
-      container!.style.opacity = '1';
-      smokeTime += dt * (0.65 + currentActivity * 0.85);
+      // Smoke swirls briskly while scrolling and glides smoothly when pausing mid-transition
+      scrollBoost *= Math.max(0, 1 - dt * 3.5);
+      smokeTime += dt * (0.25 + scrollBoost);
       uniforms.uTime.value = smokeTime;
-      uniforms.uActivity.value = currentActivity;
 
       renderer.render(scene, camera);
       rafId = requestAnimationFrame(animate);
@@ -348,9 +352,8 @@ const {
       'pagehide',
       () => {
         if (rafId) cancelAnimationFrame(rafId);
-        if (scrollIdleTimer) window.clearTimeout(scrollIdleTimer);
         resizeObserver.disconnect();
-        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('scroll', updateState);
         geometry.dispose();
         material.dispose();
         renderer.dispose();
