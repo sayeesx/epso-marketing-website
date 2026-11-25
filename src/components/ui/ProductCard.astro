@@ -8,8 +8,9 @@ interface Props {
 }
 const { product } = Astro.props;
 const slug = typeof product.slug === 'string' ? product.slug : product.slug?.current;
+const catSlug = typeof product.category?.slug === 'string' ? product.category.slug : product.category?.slug?.current || '';
 ---
-<article class="card group flex flex-col overflow-hidden">
+<article class="card group flex flex-col overflow-hidden" data-category={catSlug}>
   <a href={`/products/${slug}/`} class="block overflow-hidden" tabindex="-1" aria-hidden="true">
     <div class="m-2.5 aspect-square overflow-hidden rounded-xl bg-white/70 border border-white/50 relative">
       <SanityImage

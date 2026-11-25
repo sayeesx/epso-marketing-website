@@ -39,10 +39,11 @@ const breadcrumbs = [
       {categories.length > 0 && (
         <div class="mb-8 flex flex-wrap gap-2 items-center">
           <span class="text-sm font-medium text-brand-600">Browse by:</span>
+          <a href="/products/" class="btn-secondary text-xs px-3 py-1.5" data-cat-filter="all">All</a>
           {categories.map((cat) => {
             const catSlug = typeof cat.slug === 'string' ? cat.slug : cat.slug?.current;
             return (
-              <a href={`/products/?category=${catSlug}`} class="btn-secondary text-xs px-3 py-1.5">
+              <a href={`/products/?category=${catSlug}`} class="btn-secondary text-xs px-3 py-1.5" data-cat-filter={catSlug}>
                 {cat.name}
               </a>
             );
@@ -56,5 +57,18 @@ const breadcrumbs = [
       />
     </div>
   </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const activeCat = params.get('category');
+    if (activeCat) {
+      const cards = document.querySelectorAll<HTMLElement>('[data-category]');
+      cards.forEach((card) => {
+        if (card.dataset.category !== activeCat) {
+          card.style.display = 'none';
+        }
+      });
+    }
+  </script>
 </BaseLayout>
 

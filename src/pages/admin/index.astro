@@ -1,8 +1,953 @@
 ---
-import fs from 'node:fs';
-import path from 'node:path';
+import BaseLayout from '@layouts/BaseLayout.astro';
 
-const studioIndexPath = path.resolve(process.cwd(), 'src/pages/admin/_studio.html');
-const html = fs.readFileSync(studioIndexPath, 'utf-8');
+const projectId = import.meta.env.SANITY_PROJECT_ID || 'scsgz7wt';
+const dataset = import.meta.env.SANITY_DATASET || 'production';
+const apiVersion = import.meta.env.SANITY_API_VERSION || '2024-01-01';
 ---
-<Fragment set:html={html} />
+<BaseLayout
+  title="Product Admin"
+  description="Simple Epso product upload and management dashboard backed by Sanity CMS."
+  noindex={true}
+>
+  <div class="section-pad bg-white">
+    <div class="container-site max-w-6xl">
+      <!-- Header bar -->
+      <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-brand-200 pb-6">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-bold text-brand-950">Epso Product Admin</h1>
+          <p class="mt-1 text-sm text-brand-600">
+            Upload, edit, and publish products directly to Sanity (<code class="rounded bg-brand-100 px-1.5 py-0.5 text-xs">{projectId} / {dataset}</code>).
+          </p>
+        </div>
+
+        <div id="admin-topbar-actions" class="hidden flex-wrap items-center gap-3">
+          <button
+            id="btn-deploy-site"
+            type="button"
+            class="btn-accent text-xs px-4 py-2"
+          >
+            Publish Live Site
+          </button>
+          <button
+            id="btn-sign-out"
+            type="button"
+            class="btn-secondary text-xs px-4 py-2"
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+
+      <!-- Global feedback banner -->
+      <div id="admin-toast" class="hidden mb-6 rounded-2xl border px-4 py-3 text-sm font-medium" role="status" aria-live="polite"></div>
+
+      <!-- STEP 1: SANITY AUTH VIEW -->
+      <div id="admin-login-view" class="mx-auto max-w-lg rounded-3xl border border-brand-200 bg-white p-6 sm:p-8">
+        <h2 class="text-xl font-bold text-brand-950 mb-2">Connect Sanity Backend</h2>
+        <p class="text-sm text-brand-600 mb-6 leading-relaxed">
+          Enter your Sanity API token with <strong>Editor</strong> permissions to upload images and manage products securely from this browser.
+        </p>
+
+        <form id="login-form" class="space-y-4">
+          <div>
+            <label for="sanity-token-input" class="block text-sm font-semibold text-brand-900 mb-1.5">
+              Sanity API Write Token
+            </label>
+            <input
+              id="sanity-token-input"
+              type="password"
+              required
+              autocomplete="off"
+              placeholder="sk..."
+              class="w-full rounded-xl border border-brand-300 bg-white px-4 py-2.5 text-sm text-brand-950 focus:border-[#eb8d35] focus:outline-none"
+            />
+            <p class="mt-2 text-xs text-brand-500">
+              Need a token?
+              <a
+                href={`https://www.sanity.io/manage/project/${projectId}/api#tokens`}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="font-semibold text-[#eb8d35] hover:underline"
+              >
+                Create an Editor token in Sanity Manage →
+              </a>
+            </p>
+          </div>
+
+          <div>
+            <label for="deploy-hook-input" class="block text-sm font-semibold text-brand-900 mb-1.5">
+              Cloudflare Deploy Hook URL <span class="font-normal text-brand-400">(optional)</span>
+            </label>
+            <input
+              id="deploy-hook-input"
+              type="url"
+              placeholder="https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/..."
+              class="w-full rounded-xl border border-brand-300 bg-white px-4 py-2.5 text-sm text-brand-950 focus:border-[#eb8d35] focus:outline-none"
+            />
+            <p class="mt-1 text-xs text-brand-500">
+              Allows 1-click live site rebuilds on Cloudflare Pages after uploading products.
+            </p>
+          </div>
+
+          <label class="flex items-center gap-2 text-sm text-brand-700 cursor-pointer select-none">
+            <input id="remember-token" type="checkbox" checked class="rounded border-brand-300 text-[#eb8d35] focus:ring-[#eb8d35]" />
+            <span>Remember on this browser</span>
+          </label>
+
+          <button id="btn-connect" type="submit" class="btn-primary w-full py-3 text-sm font-semibold">
+            Connect to Sanity
+          </button>
+        </form>
+      </div>
+
+      <!-- STEP 2: MAIN PRODUCT DASHBOARD -->
+      <div id="admin-dashboard-view" class="hidden grid-cols-1 gap-8 lg:grid-cols-12">
+        <!-- Left column: Upload / Edit Product Form -->
+        <div class="lg:col-span-5">
+          <div class="rounded-3xl border border-brand-200 bg-white p-6 sm:p-7">
+            <div class="mb-5 flex items-center justify-between gap-2">
+              <h2 id="form-heading" class="text-lg font-bold text-brand-950">Upload New Product</h2>
+              <button id="btn-reset-form" type="button" class="hidden text-xs font-semibold text-[#eb8d35] hover:underline">
+                Cancel edit
+              </button>
+            </div>
+
+            <form id="product-form" class="space-y-4">
+              <input type="hidden" id="editing-product-id" value="" />
+              <input type="hidden" id="existing-image-ref" value="" />
+
+              <!-- Product Name -->
+              <div>
+                <label for="prod-name" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5">
+                  Product Name *
+                </label>
+                <input
+                  id="prod-name"
+                  type="text"
+                  required
+                  minlength="2"
+                  maxlength="100"
+                  placeholder="e.g. Epso Kerala Mixture"
+                  class="w-full rounded-xl border border-brand-300 bg-white px-3.5 py-2.5 text-sm text-brand-950 focus:border-[#eb8d35] focus:outline-none"
+                />
+              </div>
+
+              <!-- Slug -->
+              <div>
+                <label for="prod-slug" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5">
+                  URL Slug *
+                </label>
+                <input
+                  id="prod-slug"
+                  type="text"
+                  required
+                  placeholder="epso-kerala-mixture"
+                  class="w-full rounded-xl border border-brand-300 bg-brand-50/50 px-3.5 py-2 text-xs font-mono text-brand-800 focus:border-[#eb8d35] focus:outline-none"
+                />
+              </div>
+
+              <!-- Category -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label for="prod-category" class="block text-xs font-bold uppercase tracking-wider text-brand-700">
+                    Category
+                  </label>
+                  <button
+                    id="btn-quick-categories"
+                    type="button"
+                    class="text-[11px] font-semibold text-[#eb8d35] hover:underline"
+                  >
+                    + Ensure Food &amp; Home Care
+                  </button>
+                </div>
+                <select
+                  id="prod-category"
+                  class="w-full rounded-xl border border-brand-300 bg-white px-3.5 py-2.5 text-sm text-brand-950 focus:border-[#eb8d35] focus:outline-none"
+                >
+                  <option value="">Select category...</option>
+                </select>
+              </div>
+
+              <!-- Image Upload -->
+              <div>
+                <label for="prod-image" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5">
+                  Product Image
+                </label>
+                <div class="flex items-center gap-4">
+                  <div class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl border border-brand-200 bg-brand-50 flex items-center justify-center">
+                    <img
+                      id="prod-image-preview"
+                      src="/assets/products/product-placeholder.svg"
+                      alt="Product preview"
+                      class="h-full w-full object-contain p-1"
+                    />
+                  </div>
+                  <div class="flex-1">
+                    <input
+                      id="prod-image"
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/avif"
+                      class="block w-full text-xs text-brand-600 file:mr-3 file:rounded-full file:border file:border-brand-300 file:bg-white file:px-3.5 file:py-1.5 file:text-xs file:font-semibold file:text-brand-800 hover:file:bg-brand-50 cursor-pointer"
+                    />
+                    <p class="mt-1 text-[11px] text-brand-500">Square PNG/WebP/JPG recommended (min 800×800px).</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Image Alt -->
+              <div>
+                <label for="prod-image-alt" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5">
+                  Image Description (Alt Text)
+                </label>
+                <input
+                  id="prod-image-alt"
+                  type="text"
+                  placeholder="e.g. Epso Kerala Mixture 200g pack"
+                  class="w-full rounded-xl border border-brand-300 bg-white px-3.5 py-2 text-sm text-brand-950 focus:border-[#eb8d35] focus:outline-none"
+                />
+              </div>
+
+              <!-- Short Description -->
+              <div>
+                <label for="prod-short-desc" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5">
+                  Short Description
+                </label>
+                <textarea
+                  id="prod-short-desc"
+                  rows="2"
+                  maxlength="200"
+                  placeholder="Crispy traditional Kerala mixture made for everyday tea-time."
+                  class="w-full rounded-xl border border-brand-300 bg-white px-3.5 py-2 text-sm text-brand-950 focus:border-[#eb8d35] focus:outline-none resize-none"
+                ></textarea>
+              </div>
+
+              <!-- Full Description -->
+              <div>
+                <label for="prod-full-desc" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5">
+                  Full Description
+                </label>
+                <textarea
+                  id="prod-full-desc"
+                  rows="3"
+                  placeholder="Detailed product information shown on the product page..."
+                  class="w-full rounded-xl border border-brand-300 bg-white px-3.5 py-2 text-sm text-brand-950 focus:border-[#eb8d35] focus:outline-none"
+                ></textarea>
+              </div>
+
+              <!-- Pack Sizes -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label class="block text-xs font-bold uppercase tracking-wider text-brand-700">
+                    Pack Sizes
+                  </label>
+                  <button id="btn-add-size" type="button" class="text-[11px] font-semibold text-[#eb8d35] hover:underline">
+                    + Add size
+                  </button>
+                </div>
+                <div id="sizes-list" class="space-y-2"></div>
+              </div>
+
+              <!-- Key Features -->
+              <div>
+                <label for="prod-features" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5">
+                  Key Features <span class="font-normal text-brand-400">(one per line)</span>
+                </label>
+                <textarea
+                  id="prod-features"
+                  rows="3"
+                  placeholder="Freshly packed&#10;No artificial colours&#10;Resealable pouch"
+                  class="w-full rounded-xl border border-brand-300 bg-white px-3.5 py-2 text-sm text-brand-950 focus:border-[#eb8d35] focus:outline-none"
+                ></textarea>
+              </div>
+
+              <!-- Ingredients & Usage -->
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label for="prod-ingredients" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5">
+                    Ingredients
+                  </label>
+                  <textarea
+                    id="prod-ingredients"
+                    rows="2"
+                    placeholder="Optional (for food)"
+                    class="w-full rounded-xl border border-brand-300 bg-white px-3 py-2 text-xs text-brand-950 focus:border-[#eb8d35] focus:outline-none"
+                  ></textarea>
+                </div>
+                <div>
+                  <label for="prod-usage" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5">
+                    Usage Instructions
+                  </label>
+                  <textarea
+                    id="prod-usage"
+                    rows="2"
+                    placeholder="Optional (for home care)"
+                    class="w-full rounded-xl border border-brand-300 bg-white px-3 py-2 text-xs text-brand-950 focus:border-[#eb8d35] focus:outline-none"
+                  ></textarea>
+                </div>
+              </div>
+
+              <!-- Checkboxes -->
+              <div class="flex flex-wrap items-center gap-5 pt-1">
+                <label class="flex items-center gap-2 text-sm font-medium text-brand-800 cursor-pointer select-none">
+                  <input id="prod-published" type="checkbox" checked class="rounded border-brand-300 text-[#eb8d35] focus:ring-[#eb8d35]" />
+                  <span>Published</span>
+                </label>
+                <label class="flex items-center gap-2 text-sm font-medium text-brand-800 cursor-pointer select-none">
+                  <input id="prod-featured" type="checkbox" class="rounded border-brand-300 text-[#eb8d35] focus:ring-[#eb8d35]" />
+                  <span>Feature on homepage</span>
+                </label>
+              </div>
+
+              <button id="btn-save-product" type="submit" class="btn-primary w-full py-3 text-sm font-semibold">
+                Save &amp; Upload Product
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Right column: Live Product List from Sanity -->
+        <div class="lg:col-span-7">
+          <div class="rounded-3xl border border-brand-200 bg-white p-6 sm:p-7">
+            <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 class="text-lg font-bold text-brand-950">Products in Sanity</h2>
+                <p id="products-count" class="text-xs text-brand-500 mt-0.5">Loading...</p>
+              </div>
+              <button id="btn-refresh" type="button" class="btn-secondary text-xs px-4 py-1.5">
+                Refresh
+              </button>
+            </div>
+
+            <div id="products-list" class="space-y-3">
+              <p class="py-12 text-center text-sm text-brand-400">Loading products from Sanity...</p>
+            </div>
+          </div>
+
+          <div class="mt-4 rounded-2xl border border-amber-200 bg-amber-50/70 p-4 text-xs text-amber-900 leading-relaxed">
+            <strong>Note on static site updates:</strong> Products upload immediately into Sanity CMS. If you configured a Cloudflare Deploy Hook, click <strong>Publish Live Site</strong> above after making edits so Cloudflare Pages rebuilds the static pages with your new products.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin client logic (connects directly to Sanity API using the user's provided token) -->
+  <script define:vars={{ projectId, dataset, apiVersion }} is:inline>
+    window.__EPSO_SANITY_CFG__ = { projectId, dataset, apiVersion };
+  </script>
+
+  <script>
+    import { createClient, type SanityClient } from '@sanity/client';
+
+    interface AdminConfig {
+      projectId: string;
+      dataset: string;
+      apiVersion: string;
+    }
+
+    interface SizeEntry {
+      _key?: string;
+      size: string;
+      unit: string;
+      description?: string;
+    }
+
+    interface AdminProduct {
+      _id: string;
+      name: string;
+      slug?: { current?: string } | string;
+      isPublished?: boolean;
+      isFeatured?: boolean;
+      category?: { _id: string; name: string } | null;
+      mainImage?: {
+        _type: 'image';
+        asset?: { _ref?: string; _type?: 'reference' };
+        alt?: string;
+      };
+      imageUrl?: string;
+      shortDescription?: string;
+      description?: Array<{ children?: Array<{ text?: string }> }>;
+      packagingSizes?: SizeEntry[];
+      features?: Array<{ _key?: string; feature: string }>;
+      ingredients?: string;
+      usageInstructions?: string;
+    }
+
+    interface AdminCategory {
+      _id: string;
+      name: string;
+      slug?: string;
+    }
+
+    const cfg = (window as unknown as { __EPSO_SANITY_CFG__: AdminConfig }).__EPSO_SANITY_CFG__;
+    const TOKEN_KEY = 'epso_sanity_write_token';
+    const HOOK_KEY = 'epso_cf_deploy_hook';
+
+    let client: SanityClient | null = null;
+    let categories: AdminCategory[] = [];
+    let products: AdminProduct[] = [];
+
+    // DOM Elements
+    const loginView = document.getElementById('admin-login-view') as HTMLElement | null;
+    const dashboardView = document.getElementById('admin-dashboard-view') as HTMLElement | null;
+    const topbarActions = document.getElementById('admin-topbar-actions') as HTMLElement | null;
+    const toastEl = document.getElementById('admin-toast') as HTMLElement | null;
+
+    const loginForm = document.getElementById('login-form') as HTMLFormElement | null;
+    const tokenInput = document.getElementById('sanity-token-input') as HTMLInputElement | null;
+    const deployHookInput = document.getElementById('deploy-hook-input') as HTMLInputElement | null;
+    const rememberCheckbox = document.getElementById('remember-token') as HTMLInputElement | null;
+    const btnConnect = document.getElementById('btn-connect') as HTMLButtonElement | null;
+    const btnSignOut = document.getElementById('btn-sign-out') as HTMLButtonElement | null;
+    const btnDeploySite = document.getElementById('btn-deploy-site') as HTMLButtonElement | null;
+
+    const productForm = document.getElementById('product-form') as HTMLFormElement | null;
+    const formHeading = document.getElementById('form-heading') as HTMLElement | null;
+    const btnResetForm = document.getElementById('btn-reset-form') as HTMLButtonElement | null;
+    const editingIdInput = document.getElementById('editing-product-id') as HTMLInputElement | null;
+    const existingImgRefInput = document.getElementById('existing-image-ref') as HTMLInputElement | null;
+
+    const nameInput = document.getElementById('prod-name') as HTMLInputElement | null;
+    const slugInput = document.getElementById('prod-slug') as HTMLInputElement | null;
+    const categorySelect = document.getElementById('prod-category') as HTMLSelectElement | null;
+    const imageInput = document.getElementById('prod-image') as HTMLInputElement | null;
+    const imagePreview = document.getElementById('prod-image-preview') as HTMLImageElement | null;
+    const imageAltInput = document.getElementById('prod-image-alt') as HTMLInputElement | null;
+    const shortDescInput = document.getElementById('prod-short-desc') as HTMLTextAreaElement | null;
+    const fullDescInput = document.getElementById('prod-full-desc') as HTMLTextAreaElement | null;
+    const featuresInput = document.getElementById('prod-features') as HTMLTextAreaElement | null;
+    const ingredientsInput = document.getElementById('prod-ingredients') as HTMLTextAreaElement | null;
+    const usageInput = document.getElementById('prod-usage') as HTMLTextAreaElement | null;
+    const publishedCheckbox = document.getElementById('prod-published') as HTMLInputElement | null;
+    const featuredCheckbox = document.getElementById('prod-featured') as HTMLInputElement | null;
+
+    const sizesList = document.getElementById('sizes-list') as HTMLElement | null;
+    const btnAddSize = document.getElementById('btn-add-size') as HTMLButtonElement | null;
+    const btnQuickCategories = document.getElementById('btn-quick-categories') as HTMLButtonElement | null;
+    const btnSaveProduct = document.getElementById('btn-save-product') as HTMLButtonElement | null;
+    const btnRefresh = document.getElementById('btn-refresh') as HTMLButtonElement | null;
+
+    const productsList = document.getElementById('products-list') as HTMLElement | null;
+    const productsCount = document.getElementById('products-count') as HTMLElement | null;
+
+    function showToast(msg: string, type: 'success' | 'error' | 'info' = 'info') {
+      if (!toastEl) return;
+      toastEl.textContent = msg;
+      toastEl.className = 'mb-6 rounded-2xl border px-4 py-3 text-sm font-medium';
+      if (type === 'success') {
+        toastEl.classList.add('border-green-200', 'bg-green-50', 'text-green-900');
+      } else if (type === 'error') {
+        toastEl.classList.add('border-red-200', 'bg-red-50', 'text-red-900');
+      } else {
+        toastEl.classList.add('border-amber-200', 'bg-amber-50', 'text-amber-900');
+      }
+      toastEl.classList.remove('hidden');
+      window.setTimeout(() => toastEl.classList.add('hidden'), 6000);
+    }
+
+    function slugify(str: string): string {
+      return str
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 96);
+    }
+
+    function randomKey(): string {
+      return Math.random().toString(36).slice(2, 10);
+    }
+
+    function getStoredToken(): string | null {
+      return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
+    }
+
+    function saveToken(token: string, remember: boolean) {
+      localStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem(TOKEN_KEY);
+      if (remember) {
+        localStorage.setItem(TOKEN_KEY, token);
+      } else {
+        sessionStorage.setItem(TOKEN_KEY, token);
+      }
+    }
+
+    function addSizeRow(size = '', unit = 'g') {
+      if (!sizesList) return;
+      const row = document.createElement('div');
+      row.className = 'flex items-center gap-2 size-row';
+      row.innerHTML = `
+        <input type="text" placeholder="Size (e.g. 200)" value="${size.replace(/"/g, '&quot;')}" class="size-val w-1/2 rounded-xl border border-brand-300 bg-white px-3 py-1.5 text-xs text-brand-950 focus:border-[#eb8d35] focus:outline-none" />
+        <input type="text" placeholder="Unit (g/ml/kg)" value="${unit.replace(/"/g, '&quot;')}" class="size-unit w-1/3 rounded-xl border border-brand-300 bg-white px-3 py-1.5 text-xs text-brand-950 focus:border-[#eb8d35] focus:outline-none" />
+        <button type="button" class="btn-remove-size text-xs font-semibold text-red-600 hover:underline px-1">Remove</button>
+      `;
+      row.querySelector('.btn-remove-size')?.addEventListener('click', () => row.remove());
+      sizesList.appendChild(row);
+    }
+
+    function resetForm() {
+      if (!productForm) return;
+      productForm.reset();
+      if (editingIdInput) editingIdInput.value = '';
+      if (existingImgRefInput) existingImgRefInput.value = '';
+      if (imagePreview) imagePreview.src = '/assets/products/product-placeholder.svg';
+      if (publishedCheckbox) publishedCheckbox.checked = true;
+      if (featuredCheckbox) featuredCheckbox.checked = false;
+      if (formHeading) formHeading.textContent = 'Upload New Product';
+      if (btnSaveProduct) btnSaveProduct.textContent = 'Save & Upload Product';
+      btnResetForm?.classList.add('hidden');
+      if (sizesList) {
+        sizesList.innerHTML = '';
+        addSizeRow('100', 'g');
+      }
+    }
+
+    let slugManuallyEdited = false;
+    nameInput?.addEventListener('input', () => {
+      if (!slugManuallyEdited && !editingIdInput?.value && slugInput && nameInput) {
+        slugInput.value = slugify(nameInput.value);
+      }
+    });
+    slugInput?.addEventListener('input', () => {
+      slugManuallyEdited = true;
+    });
+
+    imageInput?.addEventListener('change', () => {
+      const file = imageInput.files?.[0];
+      if (file && imagePreview) {
+        imagePreview.src = URL.createObjectURL(file);
+        if (imageAltInput && !imageAltInput.value && nameInput?.value) {
+          imageAltInput.value = nameInput.value;
+        }
+      }
+    });
+
+    btnAddSize?.addEventListener('click', () => addSizeRow('', 'g'));
+    btnResetForm?.addEventListener('click', () => {
+      slugManuallyEdited = false;
+      resetForm();
+    });
+
+    async function loadData() {
+      if (!client) return;
+      try {
+        const [cats, prods] = await Promise.all([
+          client.fetch<AdminCategory[]>(
+            `*[_type == "category"] | order(name asc) { _id, name, "slug": slug.current }`
+          ),
+          client.fetch<AdminProduct[]>(
+            `*[_type == "product"] | order(_createdAt desc) {
+              _id,
+              name,
+              slug,
+              isPublished,
+              isFeatured,
+              "category": category->{ _id, name },
+              mainImage,
+              "imageUrl": mainImage.asset->url,
+              shortDescription,
+              description,
+              packagingSizes,
+              features,
+              ingredients,
+              usageInstructions
+            }`
+          ),
+        ]);
+
+        categories = cats || [];
+        products = prods || [];
+        renderCategories();
+        renderProducts();
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Failed to load data from Sanity.';
+        showToast(`Sanity error: ${msg}. Make sure this origin is added to Sanity CORS origins.`, 'error');
+      }
+    }
+
+    function renderCategories() {
+      if (!categorySelect) return;
+      const currentVal = categorySelect.value;
+      categorySelect.innerHTML = '<option value="">Select category...</option>';
+      categories.forEach((c) => {
+        const opt = document.createElement('option');
+        opt.value = c._id;
+        opt.textContent = c.name;
+        categorySelect.appendChild(opt);
+      });
+      if (currentVal) categorySelect.value = currentVal;
+    }
+
+    function renderProducts() {
+      if (!productsList || !productsCount) return;
+      productsCount.textContent = `${products.length} product${products.length === 1 ? '' : 's'} stored in Sanity`;
+
+      if (products.length === 0) {
+        productsList.innerHTML =
+          '<p class="py-12 text-center text-sm text-brand-500">No products uploaded yet. Use the form on the left to upload your first product.</p>';
+        return;
+      }
+
+      productsList.innerHTML = '';
+      products.forEach((p) => {
+        const slugStr = typeof p.slug === 'string' ? p.slug : p.slug?.current || '';
+        const card = document.createElement('div');
+        card.className = 'flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-brand-200 p-4 hover:border-brand-300 transition-colors';
+
+        const imgUrl = p.imageUrl ? `${p.imageUrl}?w=160&h=160&fit=crop&auto=format` : '/assets/products/product-placeholder.svg';
+
+        card.innerHTML = `
+          <div class="flex items-center gap-3.5 min-w-0">
+            <img src="${imgUrl}" alt="${p.name.replace(/"/g, '&quot;')}" class="h-14 w-14 flex-shrink-0 rounded-xl border border-brand-100 bg-brand-50 object-contain p-1" />
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 class="font-semibold text-sm text-brand-950 truncate">${p.name}</h3>
+                <span class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                  p.isPublished ? 'bg-green-100 text-green-800' : 'bg-brand-100 text-brand-600'
+                }">
+                  ${p.isPublished ? 'Published' : 'Draft'}
+                </span>
+                ${
+                  p.isFeatured
+                    ? '<span class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-900">Featured</span>'
+                    : ''
+                }
+              </div>
+              <p class="text-xs text-brand-500 mt-0.5 truncate">
+                ${p.category?.name || 'Uncategorized'} &middot; /products/${slugStr}/
+              </p>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 flex-shrink-0">
+            <button type="button" data-action="edit" class="rounded-full border border-brand-300 bg-white px-3 py-1 text-xs font-semibold text-brand-800 hover:bg-brand-50">Edit</button>
+            <button type="button" data-action="toggle" class="rounded-full border border-brand-300 bg-white px-3 py-1 text-xs font-semibold text-brand-800 hover:bg-brand-50">
+              ${p.isPublished ? 'Unpublish' : 'Publish'}
+            </button>
+            <button type="button" data-action="delete" class="rounded-full border border-red-200 bg-white px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-50">Delete</button>
+          </div>
+        `;
+
+        card.querySelector('[data-action="edit"]')?.addEventListener('click', () => populateFormForEdit(p));
+        card.querySelector('[data-action="toggle"]')?.addEventListener('click', () => togglePublish(p));
+        card.querySelector('[data-action="delete"]')?.addEventListener('click', () => deleteProduct(p));
+
+        productsList.appendChild(card);
+      });
+    }
+
+    function populateFormForEdit(p: AdminProduct) {
+      slugManuallyEdited = true;
+      if (editingIdInput) editingIdInput.value = p._id;
+      if (existingImgRefInput) existingImgRefInput.value = p.mainImage?.asset?._ref || '';
+      if (nameInput) nameInput.value = p.name || '';
+      if (slugInput) slugInput.value = typeof p.slug === 'string' ? p.slug : p.slug?.current || '';
+      if (categorySelect) categorySelect.value = p.category?._id || '';
+      if (imageInput) imageInput.value = '';
+      if (imagePreview) {
+        imagePreview.src = p.imageUrl ? `${p.imageUrl}?w=300&auto=format` : '/assets/products/product-placeholder.svg';
+      }
+      if (imageAltInput) imageAltInput.value = p.mainImage?.alt || p.name || '';
+      if (shortDescInput) shortDescInput.value = p.shortDescription || '';
+      if (fullDescInput) {
+        const text = (p.description || [])
+          .map((block) => (block.children || []).map((c) => c.text || '').join(''))
+          .filter(Boolean)
+          .join('\n\n');
+        fullDescInput.value = text;
+      }
+      if (featuresInput) {
+        featuresInput.value = (p.features || []).map((f) => f.feature).join('\n');
+      }
+      if (ingredientsInput) ingredientsInput.value = p.ingredients || '';
+      if (usageInput) usageInput.value = p.usageInstructions || '';
+      if (publishedCheckbox) publishedCheckbox.checked = Boolean(p.isPublished);
+      if (featuredCheckbox) featuredCheckbox.checked = Boolean(p.isFeatured);
+
+      if (sizesList) {
+        sizesList.innerHTML = '';
+        if (p.packagingSizes && p.packagingSizes.length > 0) {
+          p.packagingSizes.forEach((s) => addSizeRow(s.size, s.unit));
+        } else {
+          addSizeRow('', 'g');
+        }
+      }
+
+      if (formHeading) formHeading.textContent = `Editing: ${p.name}`;
+      if (btnSaveProduct) btnSaveProduct.textContent = 'Update Product';
+      btnResetForm?.classList.remove('hidden');
+      productForm?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function togglePublish(p: AdminProduct) {
+      if (!client) return;
+      try {
+        await client.patch(p._id).set({ isPublished: !p.isPublished }).commit();
+        showToast(`${p.name} is now ${!p.isPublished ? 'published' : 'set to draft'}.`, 'success');
+        await loadData();
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Update failed';
+        showToast(`Could not update product: ${msg}`, 'error');
+      }
+    }
+
+    async function deleteProduct(p: AdminProduct) {
+      if (!client) return;
+      if (!window.confirm(`Delete "${p.name}" permanently from Sanity?`)) return;
+      try {
+        await client.delete(p._id);
+        showToast(`Deleted "${p.name}".`, 'success');
+        if (editingIdInput?.value === p._id) resetForm();
+        await loadData();
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Delete failed';
+        showToast(`Could not delete product: ${msg}`, 'error');
+      }
+    }
+
+    btnQuickCategories?.addEventListener('click', async () => {
+      if (!client) return;
+      btnQuickCategories.disabled = true;
+      try {
+        const hasFood = categories.some((c) => c.slug === 'food' || c.name.toLowerCase().includes('food'));
+        const hasHome = categories.some((c) => c.slug === 'home-care' || c.name.toLowerCase().includes('home'));
+        const ops: Promise<unknown>[] = [];
+        if (!hasFood) {
+          ops.push(
+            client.create({
+              _type: 'category',
+              name: 'Food Products',
+              slug: { _type: 'slug', current: 'food' },
+              description: 'Kerala mixtures, snacks, biscuits and more.',
+              displayOrder: 1,
+            })
+          );
+        }
+        if (!hasHome) {
+          ops.push(
+            client.create({
+              _type: 'category',
+              name: 'Home Care',
+              slug: { _type: 'slug', current: 'home-care' },
+              description: 'Dishwashing, floor cleaners and household cleaning products.',
+              displayOrder: 2,
+            })
+          );
+        }
+        if (ops.length === 0) {
+          showToast('Food Products and Home Care categories already exist.', 'info');
+        } else {
+          await Promise.all(ops);
+          showToast('Created missing categories in Sanity!', 'success');
+          await loadData();
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Failed';
+        showToast(`Could not create categories: ${msg}`, 'error');
+      } finally {
+        btnQuickCategories.disabled = false;
+      }
+    });
+
+    productForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!client || !btnSaveProduct) return;
+
+      const name = nameInput?.value.trim() || '';
+      const slugVal = slugify(slugInput?.value || name);
+      if (!name || !slugVal) {
+        showToast('Please enter a valid product name and URL slug.', 'error');
+        return;
+      }
+
+      btnSaveProduct.disabled = true;
+      const originalText = btnSaveProduct.textContent || 'Save';
+      btnSaveProduct.textContent = 'Uploading to Sanity...';
+
+      try {
+        let imageAssetRef = existingImgRefInput?.value || '';
+        const newFile = imageInput?.files?.[0];
+        if (newFile) {
+          const uploadedAsset = await client.assets.upload('image', newFile, {
+            filename: newFile.name,
+            contentType: newFile.type,
+          });
+          imageAssetRef = uploadedAsset._id;
+        }
+
+        const sizeRows = Array.from(document.querySelectorAll('.size-row'))
+          .map((row) => {
+            const s = (row.querySelector('.size-val') as HTMLInputElement | null)?.value.trim() || '';
+            const u = (row.querySelector('.size-unit') as HTMLInputElement | null)?.value.trim() || '';
+            if (!s || !u) return null;
+            return { _key: randomKey(), size: s, unit: u };
+          })
+          .filter((x): x is { _key: string; size: string; unit: string } => x !== null);
+
+        const featuresArr = (featuresInput?.value || '')
+          .split('\n')
+          .map((line) => line.trim())
+          .filter(Boolean)
+          .map((feature) => ({ _key: randomKey(), feature }));
+
+        const fullDescBlocks = (fullDescInput?.value || '')
+          .split(/\n{2,}/)
+          .map((para) => para.trim())
+          .filter(Boolean)
+          .map((para) => ({
+            _type: 'block',
+            _key: randomKey(),
+            style: 'normal',
+            markDefs: [],
+            children: [{ _type: 'span', _key: randomKey(), text: para, marks: [] }],
+          }));
+
+        const docPayload: Record<string, unknown> = {
+          name,
+          slug: { _type: 'slug', current: slugVal },
+          isPublished: Boolean(publishedCheckbox?.checked),
+          isFeatured: Boolean(featuredCheckbox?.checked),
+          shortDescription: shortDescInput?.value.trim() || undefined,
+          description: fullDescBlocks.length > 0 ? fullDescBlocks : undefined,
+          packagingSizes: sizeRows.length > 0 ? sizeRows : undefined,
+          features: featuresArr.length > 0 ? featuresArr : undefined,
+          ingredients: ingredientsInput?.value.trim() || undefined,
+          usageInstructions: usageInput?.value.trim() || undefined,
+        };
+
+        const catId = categorySelect?.value;
+        if (catId) {
+          docPayload.category = { _type: 'reference', _ref: catId };
+        }
+
+        if (imageAssetRef) {
+          docPayload.mainImage = {
+            _type: 'image',
+            asset: { _type: 'reference', _ref: imageAssetRef },
+            alt: imageAltInput?.value.trim() || name,
+          };
+        }
+
+        const editingId = editingIdInput?.value;
+        if (editingId) {
+          await client.patch(editingId).set(docPayload).commit();
+          showToast(`Updated "${name}" in Sanity!`, 'success');
+        } else {
+          await client.create({ _type: 'product', ...docPayload });
+          showToast(`Uploaded "${name}" to Sanity!`, 'success');
+        }
+
+        slugManuallyEdited = false;
+        resetForm();
+        await loadData();
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Save failed';
+        showToast(`Failed to save product: ${msg}`, 'error');
+      } finally {
+        btnSaveProduct.disabled = false;
+        btnSaveProduct.textContent = originalText;
+      }
+    });
+
+    async function connectWithToken(token: string) {
+      const testClient = createClient({
+        projectId: cfg.projectId,
+        dataset: cfg.dataset,
+        apiVersion: cfg.apiVersion,
+        token,
+        useCdn: false,
+        ignoreBrowserTokenWarning: true,
+      });
+
+      // Verify token by reading categories/products
+      await testClient.fetch('*[_type in ["product","category"]][0..0]');
+      client = testClient;
+
+      loginView?.classList.add('hidden');
+      dashboardView?.classList.remove('hidden');
+      dashboardView?.classList.add('grid');
+      topbarActions?.classList.remove('hidden');
+      topbarActions?.classList.add('flex');
+
+      const hook = localStorage.getItem(HOOK_KEY);
+      if (btnDeploySite) {
+        btnDeploySite.style.display = hook ? 'inline-flex' : 'none';
+      }
+
+      resetForm();
+      await loadData();
+    }
+
+    loginForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const token = tokenInput?.value.trim() || '';
+      if (!token) return;
+
+      if (btnConnect) {
+        btnConnect.disabled = true;
+        btnConnect.textContent = 'Connecting...';
+      }
+
+      try {
+        const hook = deployHookInput?.value.trim();
+        if (hook) localStorage.setItem(HOOK_KEY, hook);
+        await connectWithToken(token);
+        saveToken(token, Boolean(rememberCheckbox?.checked));
+        showToast('Connected to Sanity CMS!', 'success');
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Invalid token or CORS error';
+        showToast(`Could not connect: ${msg}`, 'error');
+      } finally {
+        if (btnConnect) {
+          btnConnect.disabled = false;
+          btnConnect.textContent = 'Connect to Sanity';
+        }
+      }
+    });
+
+    btnSignOut?.addEventListener('click', () => {
+      localStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem(TOKEN_KEY);
+      client = null;
+      dashboardView?.classList.add('hidden');
+      dashboardView?.classList.remove('grid');
+      topbarActions?.classList.add('hidden');
+      topbarActions?.classList.remove('flex');
+      loginView?.classList.remove('hidden');
+      if (tokenInput) tokenInput.value = '';
+      showToast('Signed out.', 'info');
+    });
+
+    btnDeploySite?.addEventListener('click', async () => {
+      const hook = localStorage.getItem(HOOK_KEY);
+      if (!hook) {
+        showToast('No Cloudflare Deploy Hook URL saved.', 'info');
+        return;
+      }
+      btnDeploySite.disabled = true;
+      btnDeploySite.textContent = 'Triggering build...';
+      try {
+        const res = await fetch(hook, { method: 'POST' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        showToast('Cloudflare Pages rebuild triggered! Live site will update in ~1 minute.', 'success');
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Trigger failed';
+        showToast(`Deploy hook failed: ${msg}`, 'error');
+      } finally {
+        btnDeploySite.disabled = false;
+        btnDeploySite.textContent = 'Publish Live Site';
+      }
+    });
+
+    btnRefresh?.addEventListener('click', () => loadData());
+
+    // Auto-connect if token already stored in browser
+    const savedToken = getStoredToken();
+    if (savedToken) {
+      connectWithToken(savedToken).catch(() => {
+        localStorage.removeItem(TOKEN_KEY);
+        sessionStorage.removeItem(TOKEN_KEY);
+      });
+    }
+  </script>
+</BaseLayout>
