@@ -73,9 +73,9 @@ const {
             <img
               src="/assets/marketplaces/flipkart.svg"
               alt="Flipkart"
-              width="76"
-              height="23"
-              class="h-4 sm:h-4.5 w-auto object-contain"
+              width="86"
+              height="26"
+              class="h-[19px] sm:h-[22px] w-auto object-contain"
             />
           </div>
           <span class="h-3 w-px bg-brand-300/70 hidden sm:block" aria-hidden="true"></span>
@@ -92,12 +92,12 @@ const {
         </div>
       </div>
 
-      <!-- Quick action buttons (shadow-free) -->
-      <div class="flex flex-col sm:flex-row items-center gap-3.5">
-        <a href={primaryCta.href} class="btn-primary text-base px-8 py-3 transition-transform hover:-translate-y-0.5">
+      <!-- Quick action buttons (smaller height, wider width, shadow-free) -->
+      <div class="flex flex-col sm:flex-row items-center gap-3">
+        <a href={primaryCta.href} class="btn-primary min-w-[190px] sm:min-w-[210px] px-10 py-2 text-xs sm:text-sm transition-transform hover:-translate-y-0.5">
           {primaryCta.label}
         </a>
-        <a href={secondaryCta.href} class="btn-secondary text-base px-8 py-3 bg-white/90 backdrop-blur-md transition-transform hover:-translate-y-0.5">
+        <a href={secondaryCta.href} class="btn-secondary min-w-[190px] sm:min-w-[210px] px-10 py-2 text-xs sm:text-sm bg-white/90 backdrop-blur-md transition-transform hover:-translate-y-0.5">
           {secondaryCta.label}
         </a>
       </div>
@@ -226,25 +226,25 @@ const {
         float nLight = smokeDensity(uv + vec2(0.0, 0.03), uTime, uScroll);
         float scatter = clamp((n - nLight) * 4.8, -0.35, 0.85);
 
-        // Remap FBM values (0.24..0.60) across full 0..1 smoke density
-        float density = smoothstep(0.24, 0.60, n);
+        // Remap FBM values (0.26..0.60) into puffy realistic cloud billows
+        float density = smoothstep(0.26, 0.58, n);
 
         float expand = smoothstep(0.0, 0.30, uScroll);
         float part   = smoothstep(0.62, 1.0, uScroll);
 
-        float edgeFade = smoothstep(0.0, 0.10, y) * smoothstep(1.0, 0.82, y);
+        float edgeFade = smoothstep(0.0, 0.06, y) * smoothstep(1.0, 0.86, y);
         float centerDist = abs(uv.x - 0.5) * 2.0;
         float partMask = mix(1.0, smoothstep(0.0, 0.90, centerDist + (1.0 - part) * 0.60 - 0.25), part);
 
-        float alpha = clamp(density * (0.70 + expand * 0.30) * edgeFade * partMask * uVisibility * 0.88, 0.0, 0.88);
+        float alpha = clamp(density * (0.75 + expand * 0.25) * edgeFade * partMask * uVisibility * 0.90, 0.0, 0.90);
 
-        // Volumetric smoke shading with distinct depth against both orange hero and white sections
-        vec3 sunCrest    = vec3(1.000, 0.988, 0.965);
-        vec3 smokeMid    = vec3(0.885, 0.840, 0.795);
-        vec3 smokeShadow = vec3(0.690, 0.600, 0.530);
+        // Realistic whitish cumulus clouds (pure bright white crests + neutral cool-white cloud shadows)
+        vec3 sunCrest    = vec3(1.000, 1.000, 1.000);
+        vec3 smokeMid    = vec3(0.955, 0.962, 0.975);
+        vec3 smokeShadow = vec3(0.840, 0.865, 0.900);
 
-        vec3 col = mix(sunCrest, smokeMid, smoothstep(0.24, 0.60, n));
-        col = mix(col, smokeShadow, clamp(scatter, 0.0, 0.65));
+        vec3 col = mix(sunCrest, smokeMid, smoothstep(0.26, 0.58, n));
+        col = mix(col, smokeShadow, clamp(scatter * 0.75, 0.0, 0.55));
 
         gl_FragColor = vec4(col, alpha);
       }
