@@ -128,9 +128,6 @@ const {
     const hero = document.getElementById('hero-section');
     if (!container || !hero) return;
 
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) return;
-
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({
@@ -155,22 +152,25 @@ const {
 
     const drawingSize = new THREE.Vector2();
     const uniforms = {
-      uResolution: { value: new THREE.Vector2(1, 1) },
+      uAspect: { value: (window.innerWidth || 1280) / Math.max(window.innerHeight || 720, 1) },
       uTime: { value: 0 },
       uScroll: { value: 0 },
       uVisibility: { value: 0 },
     };
 
     const vertexShader = `
+      varying vec2 vUv;
       void main() {
+        vUv = uv;
         gl_Position = vec4(position, 1.0);
       }
     `;
 
-    // 6-octave FBM with two-stage domain warping & clear volumetric smoke contrast
+    // Pure GLSL ES 1.00 compliant 6-octave FBM with domain warping & volumetric smoke shading
     const fragmentShader = `
       precision highp float;
-      uniform vec2 uResolution;
+      varying vec2 vUv;
+      uniform float uAspect;
       uniform float uTime;
       uniform float uScroll;
       uniform float uVisibility;
@@ -192,65 +192,59 @@ const {
         return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
       }
 
-      const mat2 rot = mat2(0.80, 0.60, -0.60, 0.80);
-
       float fbm(vec2 p) {
         float v = 0.0;
         float a = 0.5;
         for (int i = 0; i < 6; i++) {
           v += a * noise(p);
-          p = rot * p * 2.03 + vec2(17.1, 31.7);
+          p = vec2(0.80 * p.x + 0.60 * p.y, -0.60 * p.x + 0.80 * p.y) * 2.03 + vec2(17.1, 31.7);
           a *= 0.5;
         }
         return v;
       }
 
       float smokeDensity(vec2 uv, float t, float s) {
-        float aspect = uResolution.x / max(uResolution.y, 1.0);
-        vec2 p = vec2(uv.x * aspect, uv.y) * 2.1;
-
-        // Billowing swirl driven by scroll progress + active smoke time
-        vec2 drift = vec2(t * 0.08 + s * 0.65, -t * 0.10 - s * 1.45);
+        vec2 p = vec2(uv.x * uAspect, uv.y) * 2.05;
+        vec2 drift = vec2(t * 0.08 + s * 0.70, -t * 0.11 - s * 1.50);
 
         vec2 q = vec2(
-          fbm(p + drift * 0.7),
+          fbm(p + drift * 0.70),
           fbm(p + vec2(5.2, 1.3) + drift * 0.55)
         );
         vec2 r = vec2(
-          fbm(p + 2.0 * q + vec2(1.7, 9.2) + drift * 1.1),
-          fbm(p + 2.0 * q + vec2(8.3, 2.8) + drift * 0.9)
+          fbm(p + 2.0 * q + vec2(1.7, 9.2) + drift * 1.10),
+          fbm(p + 2.0 * q + vec2(8.3, 2.8) + drift * 0.90)
         );
-        return fbm(p + 1.85 * r + drift * 0.4);
+        return fbm(p + 1.85 * r + drift * 0.40);
       }
 
       void main() {
-        vec2 uv = gl_FragCoord.xy / max(uResolution.xy, vec2(1.0));
+        vec2 uv = vUv;
         float y = uv.y;
 
         float n = smokeDensity(uv, uTime, uScroll);
-        float nLight = smokeDensity(uv + vec2(0.0, 0.028), uTime, uScroll);
-        float scatter = clamp((n - nLight) * 4.5, -0.35, 0.80);
+        float nLight = smokeDensity(uv + vec2(0.0, 0.03), uTime, uScroll);
+        float scatter = clamp((n - nLight) * 4.8, -0.35, 0.85);
 
-        // Remap FBM range (~0.24..0.64) to full 0..1 smoke density
-        float density = smoothstep(0.24, 0.62, n);
+        // Remap FBM values (0.24..0.60) across full 0..1 smoke density
+        float density = smoothstep(0.24, 0.60, n);
 
-        // Curtain rises across viewport on scroll, then parts smoothly from center
-        float expand = smoothstep(0.0, 0.35, uScroll);
-        float part   = smoothstep(0.60, 1.0, uScroll);
+        float expand = smoothstep(0.0, 0.30, uScroll);
+        float part   = smoothstep(0.62, 1.0, uScroll);
 
         float edgeFade = smoothstep(0.0, 0.10, y) * smoothstep(1.0, 0.82, y);
         float centerDist = abs(uv.x - 0.5) * 2.0;
         float partMask = mix(1.0, smoothstep(0.0, 0.90, centerDist + (1.0 - part) * 0.60 - 0.25), part);
 
-        float alpha = clamp(density * (0.65 + expand * 0.35) * edgeFade * partMask * uVisibility * 0.88, 0.0, 0.88);
+        float alpha = clamp(density * (0.70 + expand * 0.30) * edgeFade * partMask * uVisibility * 0.88, 0.0, 0.88);
 
-        // Visible volumetric contrast: sunlit ivory crests + warm mist + soft amber-gray shadows
-        vec3 sunCrest    = vec3(1.000, 0.990, 0.970);
-        vec3 smokeMid    = vec3(0.925, 0.885, 0.840);
-        vec3 smokeShadow = vec3(0.760, 0.675, 0.600);
+        // Volumetric smoke shading with distinct depth against both orange hero and white sections
+        vec3 sunCrest    = vec3(1.000, 0.988, 0.965);
+        vec3 smokeMid    = vec3(0.885, 0.840, 0.795);
+        vec3 smokeShadow = vec3(0.690, 0.600, 0.530);
 
-        vec3 col = mix(sunCrest, smokeMid, smoothstep(0.25, 0.62, n));
-        col = mix(col, smokeShadow, clamp(scatter, 0.0, 0.60));
+        vec3 col = mix(sunCrest, smokeMid, smoothstep(0.24, 0.60, n));
+        col = mix(col, smokeShadow, clamp(scatter, 0.0, 0.65));
 
         gl_FragColor = vec4(col, alpha);
       }
@@ -269,20 +263,18 @@ const {
     scene.add(quad);
 
     function resize() {
-      if (!container) return;
-      const w = container.clientWidth;
-      const h = container.clientHeight;
+      const w = window.innerWidth || document.documentElement.clientWidth || 1280;
+      const h = window.innerHeight || document.documentElement.clientHeight || 720;
       if (w === 0 || h === 0) return;
       renderer.setSize(w, h, false);
       renderer.getDrawingBufferSize(drawingSize);
-      uniforms.uResolution.value.copy(drawingSize);
+      uniforms.uAspect.value = w / Math.max(h, 1);
     }
 
     resize();
-    const resizeObserver = new ResizeObserver(resize);
-    resizeObserver.observe(container);
+    window.addEventListener('resize', resize, { passive: true });
 
-    let lastScrollY = window.scrollY;
+    let lastScrollY = window.scrollY || document.documentElement.scrollTop || 0;
     let scrollBoost = 0;
     let smokeTime = 0;
     let rafId = 0;
@@ -294,23 +286,23 @@ const {
     }
 
     function updateState() {
-      const y = window.scrollY;
+      const y = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
       const delta = Math.abs(y - lastScrollY);
       lastScrollY = y;
 
       const heroH = hero?.offsetHeight || 750;
-      const progress = Math.min(Math.max(y / (heroH * 1.15), 0), 1);
+      const progress = Math.min(Math.max(y / (heroH * 1.25), 0), 1);
       uniforms.uScroll.value = progress;
 
       if (delta > 0) {
-        scrollBoost = Math.min(2.5, scrollBoost + delta * 0.025);
-        smokeTime += delta * 0.006;
+        scrollBoost = Math.min(2.8, scrollBoost + delta * 0.03);
+        smokeTime += delta * 0.008;
       }
 
-      // Hidden at top rest (y <= 6) and once scrolled past hero transition (progress >= 1.0)
-      const fadeIn = smoothstep(0.01, 0.14, progress);
-      const fadeOut = 1 - smoothstep(0.72, 1.0, progress);
-      const vis = y <= 6 ? 0 : fadeIn * fadeOut;
+      // Hidden at top rest (y <= 4) and once scrolled well past hero (progress >= 1.0)
+      const fadeIn = smoothstep(0.0, 0.08, progress);
+      const fadeOut = 1 - smoothstep(0.75, 1.0, progress);
+      const vis = y <= 4 ? 0 : fadeIn * fadeOut;
 
       uniforms.uVisibility.value = vis;
 
@@ -339,9 +331,8 @@ const {
         return;
       }
 
-      // Smoke swirls briskly while scrolling and glides smoothly when pausing mid-transition
-      scrollBoost *= Math.max(0, 1 - dt * 3.5);
-      smokeTime += dt * (0.25 + scrollBoost);
+      scrollBoost *= Math.max(0, 1 - dt * 3.2);
+      smokeTime += dt * (0.35 + scrollBoost);
       uniforms.uTime.value = smokeTime;
 
       renderer.render(scene, camera);
@@ -352,7 +343,7 @@ const {
       'pagehide',
       () => {
         if (rafId) cancelAnimationFrame(rafId);
-        resizeObserver.disconnect();
+        window.removeEventListener('resize', resize);
         window.removeEventListener('scroll', updateState);
         geometry.dispose();
         material.dispose();
