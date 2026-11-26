@@ -11,15 +11,16 @@ const currentPath = Astro.url.pathname;
 ---
 <header class="sticky top-0 z-50 border-b border-white/60 bg-white/75 backdrop-blur-md shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] transition-all duration-300">
   <div class="container-site">
-    <nav aria-label="Main navigation" class="flex h-16 items-center justify-between gap-4">
+    <nav aria-label="Main navigation" class="flex h-12 md:h-16 items-center justify-between gap-4">
       <!-- Logo -->
       <a href="/" class="flex-shrink-0 transition-opacity hover:opacity-90 flex items-center" aria-label="Epso – go to homepage">
         <img
-          src="/logo.png"
-          alt="Epso"
+          src="/epso-marketing-logo-cherukulamba-malappuram-kerala.png"
+          alt="Epso Marketing logo - food and home care products"
+          title="Epso Marketing - Cherukulamba, Malappuram, Kerala"
           width="560"
           height="548"
-          class="h-10 sm:h-11 w-auto object-contain"
+          class="h-8 md:h-11 w-auto object-contain"
           loading="eager"
         />
       </a>
@@ -72,18 +73,18 @@ const currentPath = Astro.url.pathname;
       <!-- Mobile menu button -->
       <button
         id="mobile-menu-btn"
-        class="flex h-10 w-10 items-center justify-center rounded-full text-brand-700 hover:bg-black/5 md:hidden transition-colors"
+        class="flex h-9 w-9 items-center justify-center rounded-full text-brand-700 hover:bg-black/5 md:hidden transition-colors"
         aria-expanded="false"
         aria-controls="mobile-menu"
         aria-label="Open navigation menu"
         type="button"
       >
-        <svg id="menu-icon-open" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <svg id="menu-icon-open" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <line x1="3" y1="6" x2="21" y2="6"/>
           <line x1="3" y1="12" x2="21" y2="12"/>
           <line x1="3" y1="18" x2="21" y2="18"/>
         </svg>
-        <svg id="menu-icon-close" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" class="hidden">
+        <svg id="menu-icon-close" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" class="hidden">
           <line x1="18" y1="6" x2="6" y2="18"/>
           <line x1="6" y1="6" x2="18" y2="18"/>
         </svg>

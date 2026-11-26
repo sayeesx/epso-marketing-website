@@ -27,7 +27,24 @@ export default defineConfig({
       applyBaseStyles: false,
     }),
     sitemap({
-      filter: (page) => !page.includes('/studio') && !page.includes('/admin'),
+      filter: (page) =>
+        !page.includes('/studio') &&
+        !page.includes('/admin') &&
+        !page.includes('/privacy-policy') &&
+        !page.includes('/404'),
+      serialize(item) {
+        const url = item.url;
+        if (url === 'https://www.epso.in/' || url === 'https://epso.in/') {
+          return { ...item, changefreq: 'weekly', priority: 1.0, lastmod: new Date().toISOString() };
+        }
+        if (url.includes('/products/') || url.includes('/blog/')) {
+          return { ...item, changefreq: 'weekly', priority: 0.9, lastmod: new Date().toISOString() };
+        }
+        if (url.includes('/about/') || url.includes('/quality/') || url.includes('/contact/')) {
+          return { ...item, changefreq: 'monthly', priority: 0.8, lastmod: new Date().toISOString() };
+        }
+        return { ...item, changefreq: 'monthly', priority: 0.7, lastmod: new Date().toISOString() };
+      },
     }),
   ],
   output: 'static',

@@ -1,5 +1,6 @@
 ---
 import { sanityImageUrl } from '../../lib/sanity';
+import { getSiteUrl } from '../../lib/siteUrl';
 import type { SanityImageAsset } from '../../types/index';
 
 interface Props {
@@ -7,22 +8,42 @@ interface Props {
   description?: string;
   canonical?: string;
   image?: string | SanityImageAsset;
+  imageAlt?: string;
   type?: 'website' | 'article' | 'product';
   noindex?: boolean;
+  keywords?: string[];
+  publishedTime?: string;
+  modifiedTime?: string;
 }
 
 const {
   title,
-  description = 'Epso makes everyday food and home care products for Indian households.',
+  description = 'Epso and Epso Marketing (EPSO BAKERY & STATIONERY WHOLESALE) in Cherukulamba, Malappuram, Kerala make everyday food and home care products for Indian households.',
   canonical,
-  image = '/assets/banners/hero-placeholder.svg',
+  image = '/assets/banners/EPSO-Marketing-Truck-on-Globe.webp',
+  imageAlt = 'Epso Marketing everyday food and home care products from Cherukulamba, Malappuram, Kerala',
   type = 'website',
   noindex = false,
+  keywords = [
+    'Epso',
+    'Epso Marketing',
+    'EPSO BAKERY & STATIONERY WHOLESALE',
+    'Jabir T',
+    'Ponmala Grama Panchayat',
+    'Cherukulamba',
+    'Malappuram',
+    'Kerala FMCG',
+    'Kerala mixture',
+    'Epso food products',
+    'Epso home care',
+  ],
+  publishedTime,
+  modifiedTime,
 } = Astro.props;
 
 const siteName = 'Epso';
-const siteUrl = import.meta.env.SITE_URL || 'https://www.epso.in';
-const pageTitle = title ? `${title} | ${siteName}` : `${siteName} – Everyday Products for Every Home`;
+const siteUrl = getSiteUrl(Astro.site);
+const pageTitle = title ? `${title} | ${siteName}` : `${siteName} – Everyday Food & Home Care Products | Epso Marketing`;
 const canonicalUrl = canonical || new URL(Astro.url.pathname, siteUrl).href;
 
 let resolvedImageUrl: string;
@@ -36,13 +57,27 @@ if (typeof image === 'object' && image !== null && 'asset' in image) {
 } else if (typeof image === 'string') {
   resolvedImageUrl = image.startsWith('http') ? image : new URL(image, siteUrl).href;
 } else {
-  resolvedImageUrl = new URL('/assets/banners/hero-placeholder.svg', siteUrl).href;
+  resolvedImageUrl = new URL('/assets/banners/EPSO-Marketing-Truck-on-Globe.webp', siteUrl).href;
 }
+
+const robotsDirective = noindex
+  ? 'noindex,nofollow'
+  : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
 ---
 <title>{pageTitle}</title>
 <meta name="description" content={description} />
+<meta name="keywords" content={keywords.join(', ')} />
+<meta name="author" content="Jabir T, Epso Marketing" />
+<meta name="publisher" content="EPSO BAKERY & STATIONERY WHOLESALE" />
+<meta name="robots" content={robotsDirective} />
+<meta name="googlebot" content={robotsDirective} />
+<meta name="bingbot" content={robotsDirective} />
+<meta name="geo.region" content="IN-KL" />
+<meta name="geo.placename" content="Cherukulamba, Malappuram, Kerala, India" />
 <link rel="canonical" href={canonicalUrl} />
-{noindex && <meta name="robots" content="noindex,nofollow" />}
+<link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap-index.xml" />
+<link rel="sitemap" type="application/xml" title="Image Sitemap" href="/image-sitemap.xml" />
+<link rel="alternate" type="text/plain" title="LLMs Information" href="/llms.txt" />
 
 <!-- Open Graph -->
 <meta property="og:type" content={type} />
@@ -50,13 +85,18 @@ if (typeof image === 'object' && image !== null && 'asset' in image) {
 <meta property="og:description" content={description} />
 <meta property="og:url" content={canonicalUrl} />
 <meta property="og:image" content={resolvedImageUrl} />
+<meta property="og:image:secure_url" content={resolvedImageUrl} />
+<meta property="og:image:alt" content={imageAlt} />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:site_name" content={siteName} />
 <meta property="og:locale" content="en_IN" />
+{publishedTime && <meta property="article:published_time" content={publishedTime} />}
+{modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={pageTitle} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={resolvedImageUrl} />
+<meta name="twitter:image:alt" content={imageAlt} />

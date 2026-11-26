@@ -5,98 +5,232 @@ import SanityImage from '../../components/ui/SanityImage.astro';
 import ArrowButton from '@components/ui/ArrowButton.astro';
 import { sanityClient, sanityImageUrl } from '../../lib/sanity';
 import { getBlogPostBySlugQuery, getAllBlogSlugsQuery } from '../../lib/queries';
+import { localBlogPosts, type LocalBlogPost } from '../../data/blogPosts';
+import { getSiteUrl } from '../../lib/siteUrl';
 import type { BlogPost } from '../../types/index';
 
 export async function getStaticPaths() {
+  const paths = new Set<string>(localBlogPosts.map((p) => p.slug));
   try {
-    const slugs = await sanityClient.fetch(getAllBlogSlugsQuery);
-    return (slugs as { slug: string }[]).map((s) => ({ params: { slug: s.slug } }));
+    const slugs = await sanityClient.fetch<{ slug: string }[]>(getAllBlogSlugsQuery);
+    for (const s of slugs || []) {
+      if (s?.slug) paths.add(s.slug);
+    }
   } catch {
-    return [];
+    // Sanity not configured; static paths still generated from localBlogPosts
   }
+  return Array.from(paths).map((slug) => ({ params: { slug } }));
 }
 
 const { slug } = Astro.params;
-let post: BlogPost | null = null;
-
+let sanityPost: BlogPost | null = null;
 try {
-  post = await sanityClient.fetch(getBlogPostBySlugQuery, { slug });
+  sanityPost = await sanityClient.fetch(getBlogPostBySlugQuery, { slug });
 } catch {
-  // Could not fetch post
+  // Fallback to local blog post
 }
 
-if (!post) {
+const localPost: LocalBlogPost | undefined = localBlogPosts.find((p) => p.slug === slug);
+
+if (!sanityPost && !localPost) {
   return Astro.redirect('/404');
 }
 
-const siteUrl = import.meta.env.SITE_URL || 'https://www.epso.in';
-const postImageUrl = post.mainImage?.asset?._ref
-  ? sanityImageUrl(post.mainImage, { width: 1200, height: 630 })
-  : `${siteUrl}/assets/banners/hero-placeholder.svg`;
+const siteUrl = getSiteUrl(Astro.site);
+const title = sanityPost?.title || localPost!.title;
+const seoTitle = sanityPost?.seo?.title || localPost?.seoTitle || title;
+const description = sanityPost?.seo?.description || sanityPost?.excerpt || localPost?.description || '';
+const publishedAt = sanityPost?.publishedAt || localPost?.publishedAt;
+const updatedAt = localPost?.updatedAt || publishedAt;
+const imageAlt = localPost?.imageAlt || title;
+const imageTitle = localPost?.imageTitle || title;
 
-const articleSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'Article',
-  headline: post.title,
-  description: post.excerpt || '',
-  image: postImageUrl,
-  datePublished: post.publishedAt,
-  publisher: {
-    '@type': 'Organization',
-    name: 'Epso',
-    logo: `${siteUrl}/logo.png`,
+const postImageUrl = sanityPost?.mainImage?.asset?._ref
+  ? sanityImageUrl(sanityPost.mainImage, { width: 1200, height: 630 })
+  : `${siteUrl}${localPost?.image || '/assets/banners/EPSO-Marketing-Truck-on-Globe.webp'}`;
+
+const articleSchema: Record<string, unknown>[] = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: title,
+    description,
+    image: {
+      '@type': 'ImageObject',
+      url: postImageUrl,
+      contentUrl: postImageUrl,
+      caption: imageAlt,
+    },
+    datePublished: publishedAt,
+    dateModified: updatedAt,
+    author: {
+      '@type': 'Person',
+      name: localPost?.author || 'Jabir T',
+    },
+    publisher: {
+      '@id': `${siteUrl}/#organization`,
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${siteUrl}/blog/${slug}/`,
+    },
+    keywords: localPost?.keywords?.join(', '),
   },
-};
+  ...(localPost?.faqs?.length
+    ? [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: localPost.faqs.map((faq) => ({
+            '@type': 'Question',
+            name: faq.question,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: faq.answer,
+            },
+          })),
+        },
+      ]
+    : []),
+];
 
 const breadcrumbs = [
   { label: 'Home', href: '/' },
   { label: 'Blog', href: '/blog/' },
-  { label: post.title, href: `/blog/${slug}/` },
+  { label: title, href: `/blog/${slug}/` },
 ];
+
+const relatedLocalPosts = localBlogPosts.filter((p) => p.slug !== slug).slice(0, 2);
 ---
 <BaseLayout
-  title={post.seo?.title || post.title}
-  description={post.seo?.description || post.excerpt || ''}
-  image={post.seo?.ogImage || post.mainImage || postImageUrl}
+  title={seoTitle}
+  description={description}
+  image={sanityPost?.seo?.ogImage || sanityPost?.mainImage || postImageUrl}
+  imageAlt={imageAlt}
   type="article"
+  keywords={localPost?.keywords}
+  publishedTime={publishedAt}
+  modifiedTime={updatedAt}
   structuredData={articleSchema}
 >
   <div class="section-pad">
     <div class="container-site">
       <Breadcrumbs items={breadcrumbs} />
       <article class="mx-auto max-w-2xl">
-        {post.publishedAt && (
-          <time class="text-sm text-brand-400" datetime={post.publishedAt}>
-            {new Date(post.publishedAt).toLocaleDateString('en-IN', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </time>
-        )}
-        <h1 class="mt-2 mb-6 text-brand-900 tracking-tight">{post.title}</h1>
-        {post.mainImage && (
+        <div class="flex flex-wrap items-center gap-2.5 mb-2">
+          {localPost?.category && (
+            <span class="text-xs font-semibold uppercase tracking-wider text-brand-800 bg-brand-100 px-3 py-1 rounded-full">
+              {localPost.category}
+            </span>
+          )}
+          {publishedAt && (
+            <time class="text-sm text-brand-500" datetime={publishedAt}>
+              {new Date(publishedAt).toLocaleDateString('en-IN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </time>
+          )}
+          {localPost?.readTime && (
+            <span class="text-sm text-brand-400">&bull; {localPost.readTime}</span>
+          )}
+        </div>
+
+        <h1 class="mt-2 mb-6 text-brand-900 tracking-tight">{title}</h1>
+
+        {(sanityPost?.mainImage || localPost?.image) && (
           <div class="mb-8 aspect-video overflow-hidden rounded-2xl border border-white/80 bg-white/70 backdrop-blur-md p-2 shadow-glass">
-            <SanityImage
-              image={post.mainImage}
-              alt={post.title}
-              width={800}
-              height={450}
-              loading="eager"
-              class="h-full w-full object-cover rounded-xl"
-            />
+            {sanityPost?.mainImage ? (
+              <SanityImage
+                image={sanityPost.mainImage}
+                alt={imageAlt}
+                width={800}
+                height={450}
+                loading="eager"
+                fetchpriority="high"
+                class="h-full w-full object-cover rounded-xl"
+              />
+            ) : (
+              <img
+                src={localPost!.image}
+                alt={imageAlt}
+                title={imageTitle}
+                width="800"
+                height="450"
+                loading="eager"
+                fetchpriority="high"
+                class="h-full w-full object-cover object-top rounded-xl"
+              />
+            )}
           </div>
         )}
-        <div class="text-brand-600 leading-relaxed space-y-4">
-          {post.excerpt && (
-            <p class="text-lg font-medium text-brand-700">{post.excerpt}</p>
+
+        <div class="text-brand-700 leading-relaxed space-y-6">
+          {(sanityPost?.excerpt || localPost?.excerpt) && (
+            <p class="text-lg font-medium text-brand-800">
+              {sanityPost?.excerpt || localPost?.excerpt}
+            </p>
           )}
-          <!-- Full Portable Text body — install @portabletext/astro for rich text rendering -->
-          <!-- pnpm add @portabletext/astro -->
-          <p class="text-brand-400 text-sm italic border border-brand-100 rounded p-4">
-            [Article body — install @portabletext/astro and configure PortableText renderer to display full content]
-          </p>
+
+          {localPost?.quickAnswer && (
+            <div class="rounded-2xl border border-amber-400/40 bg-amber-50/70 p-5">
+              <p class="text-xs font-bold uppercase tracking-wider text-amber-900 mb-1">Quick summary</p>
+              <p class="text-sm text-brand-900 leading-relaxed">{localPost.quickAnswer}</p>
+            </div>
+          )}
+
+          {localPost ? (
+            <>
+              {localPost.sections.map((section) => (
+                <section class="space-y-3">
+                  <h2 class="text-xl font-bold text-brand-900 pt-2">{section.heading}</h2>
+                  {section.paragraphs.map((para) => (
+                    <p class="text-base text-brand-700 leading-relaxed">{para}</p>
+                  ))}
+                  {section.bullets && section.bullets.length > 0 && (
+                    <ul class="list-disc pl-5 space-y-2 text-brand-700">
+                      {section.bullets.map((bullet) => (
+                        <li>{bullet}</li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              ))}
+
+              {localPost.faqs.length > 0 && (
+                <section class="pt-4 space-y-3">
+                  <h2 class="text-xl font-bold text-brand-900">Common questions</h2>
+                  {localPost.faqs.map((faq) => (
+                    <div class="glass-panel p-4">
+                      <h3 class="text-base font-semibold text-brand-900">{faq.question}</h3>
+                      <p class="mt-1 text-sm text-brand-600 leading-relaxed">{faq.answer}</p>
+                    </div>
+                  ))}
+                </section>
+              )}
+            </>
+          ) : (
+            <p class="text-brand-400 text-sm italic border border-brand-100 rounded p-4">
+              [Article body — configure PortableText renderer to display rich text from Sanity]
+            </p>
+          )}
         </div>
+
+        {relatedLocalPosts.length > 0 && (
+          <section class="mt-12 pt-8 border-t border-brand-200">
+            <h2 class="text-lg font-bold text-brand-900 mb-4">More from Epso</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {relatedLocalPosts.map((rel) => (
+                <a href={`/blog/${rel.slug}/`} class="glass-panel p-4 hover:border-brand-300 transition-colors block">
+                  <p class="text-xs font-semibold text-amber-900 mb-1">{rel.category}</p>
+                  <h3 class="text-sm font-bold text-brand-900 leading-snug">{rel.title}</h3>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
         <div class="mt-10 pt-6 border-t border-brand-200">
           <a href="/blog/" class="group btn-secondary inline-flex items-center gap-2 pl-2">
             <ArrowButton as="span" direction="left" size="sm" color="#1a202c" hoverColor="#eb8d35" />
@@ -107,4 +241,3 @@ const breadcrumbs = [
     </div>
   </div>
 </BaseLayout>
-

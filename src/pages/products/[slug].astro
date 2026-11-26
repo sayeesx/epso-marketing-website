@@ -3,10 +3,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/seo/Breadcrumbs.astro';
 import SanityImage from '../../components/ui/SanityImage.astro';
 import ProductCard from '../../components/ui/ProductCard.astro';
-import ContactCta from '../../components/sections/ContactCta.astro';
 import PhosphorIcon from '../../components/ui/PhosphorIcon.astro';
 import ArrowButton from '@components/ui/ArrowButton.astro';
 import { sanityClient, sanityImageUrl } from '../../lib/sanity';
+import { getSiteUrl } from '../../lib/siteUrl';
 import { getProductBySlugQuery, getAllProductSlugsQuery } from '../../lib/queries';
 import type { Product } from '../../types/index';
 
@@ -54,7 +54,7 @@ const breadcrumbs = [
   { label: product.name, href: `/products/${slug}/` },
 ];
 
-const siteUrl = import.meta.env.SITE_URL || 'https://www.epso.in';
+const siteUrl = getSiteUrl(Astro.site);
 const productImageUrl = product.mainImage?.asset?._ref
   ? sanityImageUrl(product.mainImage, { width: 800, height: 800 })
   : `${siteUrl}/assets/products/product-placeholder.svg`;
@@ -215,6 +215,5 @@ const productSchema = {
       )}
     </div>
   </div>
-  <ContactCta productName={product.name} />
 </BaseLayout>
 

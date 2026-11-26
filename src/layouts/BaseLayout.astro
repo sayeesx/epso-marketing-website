@@ -3,6 +3,7 @@ import SEO from '../components/seo/SEO.astro';
 import Header from '../components/navigation/Header.astro';
 import Footer from '../components/navigation/Footer.astro';
 import StructuredData from '../components/seo/StructuredData.astro';
+import { getSiteUrl } from '../lib/siteUrl';
 import type { SanityImageAsset } from '../types/index';
 import '../styles/global.css';
 
@@ -11,21 +12,79 @@ interface Props {
   description?: string;
   canonical?: string;
   image?: string | SanityImageAsset;
+  imageAlt?: string;
   type?: 'website' | 'article' | 'product';
   noindex?: boolean;
+  keywords?: string[];
+  publishedTime?: string;
+  modifiedTime?: string;
   structuredData?: Record<string, unknown> | Record<string, unknown>[];
 }
 
-const { title, description, canonical, image, type, noindex, structuredData } = Astro.props;
+const {
+  title,
+  description,
+  canonical,
+  image,
+  imageAlt,
+  type,
+  noindex,
+  keywords,
+  publishedTime,
+  modifiedTime,
+  structuredData,
+} = Astro.props;
 
-const siteUrl = import.meta.env.SITE_URL || 'https://www.epso.in';
+const siteUrl = getSiteUrl(Astro.site);
 
 const orgSchema = {
   '@context': 'https://schema.org',
-  '@type': 'Organization',
+  '@type': ['Organization', 'WholesaleStore'],
+  '@id': `${siteUrl}/#organization`,
   name: 'Epso',
+  alternateName: ['Epso Marketing', 'EPSO BAKERY & STATIONERY WHOLESALE'],
+  legalName: 'EPSO BAKERY & STATIONERY WHOLESALE',
+  description:
+    'Epso is an Indian FMCG brand supported by EPSO BAKERY & STATIONERY WHOLESALE, a wholesale and retail supplier in Cherukulamba, Malappuram district, Kerala, founded by Jabir T.',
   url: siteUrl,
-  logo: `${siteUrl}/logo.png`,
+  logo: {
+    '@type': 'ImageObject',
+    url: `${siteUrl}/epso-marketing-logo-cherukulamba-malappuram-kerala.png`,
+    contentUrl: `${siteUrl}/epso-marketing-logo-cherukulamba-malappuram-kerala.png`,
+    caption: 'Epso Marketing Official Logo - Cherukulamba, Malappuram, Kerala',
+  },
+  image: `${siteUrl}/assets/banners/EPSO-Marketing-Truck-on-Globe.webp`,
+  telephone: '+91-98096-65188',
+  areaServed: {
+    '@type': 'AdministrativeArea',
+    name: 'Kerala, India',
+  },
+  founder: {
+    '@type': 'Person',
+    '@id': `${siteUrl}/#jabir-t`,
+    name: 'Jabir T',
+    jobTitle: 'Founder, Epso Marketing & Elected Member, Ponmala Grama Panchayat',
+    image: `${siteUrl}/jabir-t-founder-epso-marketing-ponmala-grama-panchayat.webp`,
+    memberOf: {
+      '@type': 'GovernmentOrganization',
+      name: 'Ponmala Grama Panchayat',
+    },
+  },
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Cherukulamba',
+    addressLocality: 'Cherukulamba',
+    addressRegion: 'Malappuram, Kerala',
+    addressCountry: 'IN',
+  },
+  knowsAbout: [
+    'Kerala mixtures',
+    'Everyday snacks and biscuits',
+    'Dishwashing liquids',
+    'Floor cleaners',
+    'Household cleaning products',
+    'Wholesale and retail FMCG supply in Malappuram, Kerala',
+  ],
   sameAs: [],
 };
 
@@ -80,8 +139,12 @@ const allStructuredData = [
       description={description}
       canonical={canonical}
       image={image}
+      imageAlt={imageAlt}
       type={type}
       noindex={noindex}
+      keywords={keywords}
+      publishedTime={publishedTime}
+      modifiedTime={modifiedTime}
     />
     <StructuredData data={allStructuredData} />
   </head>

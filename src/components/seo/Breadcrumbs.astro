@@ -1,12 +1,13 @@
 ---
 import type { BreadcrumbItem } from '../../types/index';
+import { getSiteUrl } from '../../lib/siteUrl';
 
 interface Props {
   items: BreadcrumbItem[];
 }
 const { items } = Astro.props;
 
-const siteUrl = import.meta.env.SITE_URL || 'https://www.epso.in';
+const siteUrl = getSiteUrl(Astro.site);
 
 const schema = {
   '@context': 'https://schema.org',

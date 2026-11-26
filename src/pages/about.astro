@@ -1,27 +1,105 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ContactCta from '../components/sections/ContactCta.astro';
+import Breadcrumbs from '../components/seo/Breadcrumbs.astro';
 import PhosphorIcon from '../components/ui/PhosphorIcon.astro';
+import { getSiteUrl } from '../lib/siteUrl';
+
+const siteUrl = getSiteUrl(Astro.site);
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'About Epso', href: '/about/' },
+];
+
+const faqs = [
+  {
+    question: 'What is Epso and Epso Marketing?',
+    answer:
+      'Epso is an Indian FMCG brand making everyday food products (Kerala mixtures, snacks, and biscuits) and home care products (dishwashing liquids, floor cleaners, and household cleaning products) for families across Kerala and India.',
+  },
+  {
+    question: 'Where is EPSO BAKERY & STATIONERY WHOLESALE located?',
+    answer:
+      'EPSO BAKERY & STATIONERY WHOLESALE is a wholesale and retail supplier located in Cherukulamba, Malappuram district, Kerala, India.',
+  },
+  {
+    question: 'Who is Jabir T?',
+    answer:
+      'Jabir T is the founder of Epso Marketing and is an elected member of the Ponmala Grama Panchayat in Malappuram district, Kerala.',
+  },
+  {
+    question: 'Where can I buy Epso products?',
+    answer:
+      'Epso products are available online on Amazon, Flipkart, and JioMart, as well as through wholesale and retail supply from EPSO BAKERY & STATIONERY WHOLESALE in Cherukulamba, Malappuram.',
+  },
+];
+
+const aboutStructuredData: Record<string, unknown>[] = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    name: 'About Epso, Epso Marketing & Founder Jabir T',
+    description:
+      'EPSO BAKERY & STATIONERY WHOLESALE is a wholesale and retail supplier in Cherukulamba, Malappuram district, Kerala, founded by Jabir T, elected member of Ponmala Grama Panchayat.',
+    url: `${siteUrl}/about/`,
+    mainEntity: {
+      '@id': `${siteUrl}/#organization`,
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    '@id': `${siteUrl}/#jabir-t`,
+    name: 'Jabir T',
+    jobTitle: 'Founder, Epso Marketing & Elected Member, Ponmala Grama Panchayat',
+    image: `${siteUrl}/jabir-t-founder-epso-marketing-ponmala-grama-panchayat.webp`,
+    worksFor: {
+      '@type': 'Organization',
+      name: 'Epso Marketing',
+      legalName: 'EPSO BAKERY & STATIONERY WHOLESALE',
+    },
+    memberOf: {
+      '@type': 'GovernmentOrganization',
+      name: 'Ponmala Grama Panchayat',
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
+  },
+];
 ---
 <BaseLayout
-  title="About Epso"
-  description="Epso is an Indian FMCG brand making food and home care products for everyday households."
+  title="About Epso, Epso Marketing & Jabir T"
+  description="EPSO BAKERY & STATIONERY WHOLESALE is a wholesale and retail supplier in Cherukulamba, Malappuram, Kerala, founded by Jabir T (Ponmala Grama Panchayat)."
+  image="/jabir-t-founder-epso-marketing-ponmala-grama-panchayat.webp"
+  imageAlt="Jabir T, Founder of Epso Marketing and Elected Member of Ponmala Grama Panchayat"
+  structuredData={aboutStructuredData}
 >
   <div class="section-pad">
     <div class="container-site">
       <div class="mx-auto max-w-3xl">
+        <Breadcrumbs items={breadcrumbs} />
         <h1 class="mb-6 text-brand-800">About Epso</h1>
 
         <div class="glass-panel border-amber-500/25 bg-amber-500/10 p-5 mb-8">
           <p class="text-sm text-amber-900 font-medium flex items-center gap-2">
             <PhosphorIcon name="note-pencil" size={18} class="text-amber-800 flex-shrink-0" />
-            <span>This content is a placeholder. Update it with the actual Epso company story in Sanity CMS or directly in this file.</span>
+            <span>Additional company details (such as email and registration numbers) will be updated in Sanity CMS or directly in this file once confirmed.</span>
           </p>
         </div>
 
         <div class="space-y-6 text-brand-700 leading-relaxed">
           <p class="text-lg font-medium text-brand-900">
-            Epso is an Indian FMCG brand making everyday products for homes across Kerala.
+            EPSO BAKERY &amp; STATIONERY WHOLESALE is a wholesale and retail supplier located in Cherukulamba, Malappuram district, Kerala.
           </p>
 
           <p>
@@ -29,19 +107,52 @@ import PhosphorIcon from '../components/ui/PhosphorIcon.astro';
           </p>
 
           <p>
-            Our goal is simple — make good products that everyday Indian families can trust and afford.
+            Founded by Jabir T, an elected member of the Ponmala Grama Panchayat, our goal is simple — make good products that everyday Indian families can trust and afford.
           </p>
 
+          <!-- Founder Profile Card -->
+          <div
+            class="rounded-2xl border border-brand-200/80 p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6"
+            style="background: linear-gradient(135deg, #FFFFFF 0%, #FFFBF5 45%, #FFF1DF 100%);"
+          >
+            <img
+              src="/jabir-t-founder-epso-marketing-ponmala-grama-panchayat.webp"
+              alt="Jabir T, Founder of Epso Marketing and Elected Member of Ponmala Grama Panchayat"
+              title="Jabir T - Founder of Epso Marketing and Ponmala Grama Panchayat Elected Member"
+              width="1008"
+              height="1047"
+              loading="lazy"
+              class="w-36 h-36 rounded-2xl object-cover object-[50%_15%] border border-brand-200/80 bg-white flex-shrink-0"
+            />
+            <div class="text-center sm:text-left">
+              <h2 class="text-xl font-bold text-brand-950">Jabir T</h2>
+              <p class="text-sm font-semibold text-brand-700 mt-0.5">Founder, Epso Marketing</p>
+              <p class="text-sm text-brand-600 mt-0.5">Elected Member, Ponmala Grama Panchayat</p>
+              <p class="text-sm text-brand-600 mt-3 leading-relaxed">
+                Leading Epso from Cherukulamba, Malappuram district, Kerala to deliver reliable everyday food and home care essentials to homes and retailers.
+              </p>
+            </div>
+          </div>
+
+          <!-- Company Info Card -->
           <div class="glass-panel p-6 sm:p-8">
             <h2 class="mb-4 text-xl font-bold text-brand-900">Company information</h2>
             <div class="space-y-3 text-sm text-brand-700">
-              <p class="flex items-center gap-2.5">
-                <PhosphorIcon name="map-pin" size={18} class="text-amber-700 flex-shrink-0" />
-                <span>Address: <em>[To be updated]</em></span>
+              <p class="flex items-start gap-2.5">
+                <PhosphorIcon name="buildings" size={18} class="text-amber-700 flex-shrink-0 mt-0.5" />
+                <span>Business: <strong class="text-brand-900">EPSO BAKERY &amp; STATIONERY WHOLESALE</strong> (Wholesale &amp; retail supplier)</span>
+              </p>
+              <p class="flex items-start gap-2.5">
+                <PhosphorIcon name="map-pin" size={18} class="text-amber-700 flex-shrink-0 mt-0.5" />
+                <span>Location: Cherukulamba, Malappuram district, Kerala</span>
+              </p>
+              <p class="flex items-start gap-2.5">
+                <PhosphorIcon name="check-circle" size={18} class="text-amber-700 flex-shrink-0 mt-0.5" />
+                <span>Founder: <strong class="text-brand-900">Jabir T</strong> (Elected Member, Ponmala Grama Panchayat)</span>
               </p>
               <p class="flex items-center gap-2.5">
                 <PhosphorIcon name="phone" size={18} class="text-amber-700 flex-shrink-0" />
-                <span>Phone: <em>[To be updated]</em></span>
+                <span>Phone: <a href="tel:+919809665188" class="font-semibold text-brand-900 hover:underline">+91 98096 65188</a></span>
               </p>
               <p class="flex items-center gap-2.5">
                 <PhosphorIcon name="envelope-simple" size={18} class="text-amber-700 flex-shrink-0" />
@@ -53,10 +164,21 @@ import PhosphorIcon from '../components/ui/PhosphorIcon.astro';
               </p>
             </div>
           </div>
+
+          <!-- AEO FAQ Section -->
+          <section aria-labelledby="about-faq-heading" class="pt-4">
+            <h2 id="about-faq-heading" class="mb-4 text-xl font-bold text-brand-900">Frequently asked questions</h2>
+            <div class="space-y-3">
+              {faqs.map((faq) => (
+                <div class="glass-panel p-5">
+                  <h3 class="text-base font-bold text-brand-900">{faq.question}</h3>
+                  <p class="mt-1.5 text-sm text-brand-600 leading-relaxed">{faq.answer}</p>
+                </div>
+              ))}
+            </div>
+          </section>
         </div>
       </div>
     </div>
   </div>
-  <ContactCta heading="Want to know more?" />
 </BaseLayout>
-

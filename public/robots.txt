@@ -1,7 +1,92 @@
+# Epso & Epso Marketing - Global Search, Image Search, and AI/GEO Crawler Policy
 User-agent: *
 Allow: /
 Disallow: /studio/
 Disallow: /admin/
+Disallow: /api/
 
+# Google Search, Google Images, Google AI Overviews & Gemini
+User-agent: Googlebot
+Allow: /
+Disallow: /studio/
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+# Bing & Microsoft Copilot
+User-agent: Bingbot
+Allow: /
+Disallow: /studio/
+Disallow: /admin/
+Disallow: /api/
+
+# OpenAI / ChatGPT Search
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /studio/
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: GPTBot
+Allow: /
+Disallow: /studio/
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: ChatGPT-User
+Allow: /
+
+# Perplexity AI Search
+User-agent: PerplexityBot
+Allow: /
+Disallow: /studio/
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: Perplexity-User
+Allow: /
+
+# Anthropic Claude
+User-agent: ClaudeBot
+Allow: /
+Disallow: /studio/
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# Apple, DuckDuckGo, Meta, Amazon, Cohere, Yandex
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: Yandex
+Allow: /
+
+# Sitemaps & AI Knowledge Files
 Sitemap: https://www.epso.in/sitemap-index.xml
-
+Sitemap: https://www.epso.in/image-sitemap.xml
+# LLMs / AEO / GEO index: https://www.epso.in/llms.txt

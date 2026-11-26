@@ -42,6 +42,7 @@ const {
     <img
       src={imageSrc}
       alt={imageAlt}
+      title="Epso Marketing delivery truck delivering everyday food and home care products across Kerala and India"
       width="1661"
       height="947"
       loading="eager"
@@ -140,8 +141,9 @@ const {
       return;
     }
 
-    // Render soft cloud canvas at 0.35x scale for silky 120fps scrolling with zero GPU lag
-    renderer.setPixelRatio(0.35);
+    // Render soft cloud canvas at 0.55x on mobile for crisp billows and 0.35x on desktop for 120fps scrolling
+    const isMobileViewport = (window.innerWidth || 1280) < 768;
+    renderer.setPixelRatio(isMobileViewport ? 0.55 : 0.35);
     renderer.setClearColor(0x000000, 0);
     renderer.domElement.style.width = '100%';
     renderer.domElement.style.height = '100%';
@@ -152,10 +154,11 @@ const {
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
     const uniforms = {
-      uAspect: { value: (window.innerWidth || 1280) / Math.max(window.innerHeight || 720, 1) },
+      uAspect: { value: (container.clientWidth || window.innerWidth || 1280) / Math.max(container.clientHeight || window.innerHeight || 720, 1) },
       uTime: { value: 0 },
       uScroll: { value: 0 },
       uVisibility: { value: 0 },
+      uCutoffUv: { value: 0 },
     };
 
     const vertexShader = `
@@ -166,19 +169,24 @@ const {
       }
     `;
 
-    // Fast GPU-optimized 4-octave FBM with single-pass warp for 120fps smooth scrolling
+    // Fast GPU-optimized 4-octave FBM with highp precision & FP16-safe hash for mobile GPUs
     const fragmentShader = `
+      #ifdef GL_FRAGMENT_PRECISION_HIGH
+      precision highp float;
+      #else
       precision mediump float;
+      #endif
       varying vec2 vUv;
       uniform float uAspect;
       uniform float uTime;
       uniform float uScroll;
       uniform float uVisibility;
+      uniform float uCutoffUv;
 
       float hash(vec2 p) {
-        p = fract(p * vec2(123.34, 456.21));
-        p += dot(p, p + 45.32);
-        return fract(p.x * p.y);
+        vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+        p3 += dot(p3, p3.yzx + 33.33);
+        return fract((p3.x + p3.y) * p3.z);
       }
 
       float noise(vec2 p) {
@@ -197,7 +205,7 @@ const {
         float a = 0.5;
         for (int i = 0; i < 4; i++) {
           v += a * noise(p);
-          p = vec2(0.80 * p.x + 0.60 * p.y, -0.60 * p.x + 0.80 * p.y) * 2.04 + vec2(17.1, 31.7);
+          p = vec2(0.80 * p.x + 0.60 * p.y, -0.60 * p.x + 0.80 * p.y) * 2.04 + vec2(1.71, 3.17);
           a *= 0.5;
         }
         return v;
@@ -207,7 +215,10 @@ const {
         vec2 uv = vUv;
         float y = uv.y;
 
-        vec2 p = vec2(uv.x * uAspect, y) * 2.05;
+        // Keep cloud billows isotropic and well-proportioned on both portrait mobile and widescreen desktop
+        float scaleX = max(uAspect, 1.0);
+        float scaleY = max(1.0 / max(uAspect, 0.35), 1.0);
+        vec2 p = vec2(uv.x * scaleX, y * scaleY) * 2.05;
         vec2 drift = vec2(uTime * 0.08 + uScroll * 0.70, -uTime * 0.11 - uScroll * 1.45);
 
         vec2 q = vec2(
@@ -219,23 +230,27 @@ const {
         float nLight = noise((p + 1.85 * q + drift * 0.40) + vec2(0.0, 0.15));
         float scatter = clamp((n - nLight) * 2.2, -0.25, 0.70);
 
-        float density = smoothstep(0.26, 0.58, n);
+        float density = smoothstep(0.24, 0.56, n);
         float expand = smoothstep(0.0, 0.30, uScroll);
         float part   = smoothstep(0.62, 1.0, uScroll);
 
-        float edgeFade = smoothstep(0.0, 0.06, y) * smoothstep(1.0, 0.86, y);
+        // Feather smoothly at the top viewport edge and just above "What we make" (edge0 < edge1 strictly for GLSL ES)
+        float topFade = 1.0 - smoothstep(0.93, 1.0, y);
+        float bottomFade = smoothstep(uCutoffUv, uCutoffUv + 0.06, y);
+        float edgeFade = topFade * bottomFade;
+
         float centerDist = abs(uv.x - 0.5) * 2.0;
         float partMask = mix(1.0, smoothstep(0.0, 0.90, centerDist + (1.0 - part) * 0.60 - 0.25), part);
 
-        float alpha = clamp(density * (0.75 + expand * 0.25) * edgeFade * partMask * uVisibility * 0.90, 0.0, 0.90);
+        float alpha = clamp(density * (0.78 + expand * 0.22) * edgeFade * partMask * uVisibility * 0.92, 0.0, 0.92);
 
-        // Realistic whitish cumulus clouds
+        // Realistic whitish cumulus clouds with crisp shadow depth
         vec3 sunCrest    = vec3(1.000, 1.000, 1.000);
-        vec3 smokeMid    = vec3(0.955, 0.962, 0.975);
-        vec3 smokeShadow = vec3(0.840, 0.865, 0.900);
+        vec3 smokeMid    = vec3(0.945, 0.955, 0.970);
+        vec3 smokeShadow = vec3(0.800, 0.835, 0.880);
 
         vec3 col = mix(sunCrest, smokeMid, density);
-        col = mix(col, smokeShadow, clamp(scatter * 0.70, 0.0, 0.50));
+        col = mix(col, smokeShadow, clamp(scatter * 0.75, 0.0, 0.55));
 
         gl_FragColor = vec4(col, alpha);
       }
@@ -254,15 +269,17 @@ const {
     scene.add(quad);
 
     function resize() {
-      const w = window.innerWidth || document.documentElement.clientWidth || 1280;
-      const h = window.innerHeight || document.documentElement.clientHeight || 720;
+      const w = container!.clientWidth || window.innerWidth || document.documentElement.clientWidth || 1280;
+      const h = container!.clientHeight || window.innerHeight || document.documentElement.clientHeight || 720;
       if (w === 0 || h === 0) return;
+      renderer.setPixelRatio(w < 768 ? 0.55 : 0.35);
       renderer.setSize(w, h, false);
       uniforms.uAspect.value = w / Math.max(h, 1);
     }
 
     resize();
     window.addEventListener('resize', resize, { passive: true });
+    window.visualViewport?.addEventListener('resize', resize, { passive: true });
 
     let targetScrollY = window.scrollY || document.documentElement.scrollTop || 0;
     let smoothScrollY = targetScrollY;
@@ -277,31 +294,34 @@ const {
 
     function onScroll() {
       targetScrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-      if (targetScrollY > 4 && !rafId) {
+      if (targetScrollY > 2 && !rafId) {
         lastFrameTime = performance.now();
         rafId = requestAnimationFrame(animate);
       }
     }
 
     window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('touchmove', onScroll, { passive: true });
 
     function animate(now: number) {
       const dt = Math.min((now - lastFrameTime) * 0.001, 0.05);
       lastFrameTime = now;
 
+      const viewH = container!.clientHeight || window.innerHeight || 720;
       const heroRect = hero!.getBoundingClientRect();
       const heroH = heroRect.height || 750;
       const cutoffY = whatWeMake ? whatWeMake.getBoundingClientRect().top : heroRect.bottom;
-      const clampedCutoff = Math.max(0, Math.min(window.innerHeight, cutoffY));
+      const clampedCutoff = Math.max(0, Math.min(viewH, cutoffY));
 
       smoothScrollY += (targetScrollY - smoothScrollY) * Math.min(1, dt * 14);
-      const progress = Math.min(Math.max(smoothScrollY / Math.max(heroH * 1.05, 320), 0), 1);
+      const scrollSpan = Math.max(heroH * 1.05, 220);
+      const progress = Math.min(Math.max(smoothScrollY / scrollSpan, 0), 1);
 
-      const fadeIn = smoothstep(0.0, 0.08, progress);
-      const fadeOut = 1 - smoothstep(0.72, 1.0, progress);
-      const vis = (smoothScrollY <= 4 && targetScrollY <= 4) || clampedCutoff <= 1 ? 0 : fadeIn * fadeOut;
+      const fadeIn = smoothstep(0.0, 0.03, progress);
+      const fadeOut = 1 - smoothstep(0.76, 1.0, progress);
+      const vis = (smoothScrollY <= 2 && targetScrollY <= 2) || clampedCutoff <= 1 ? 0 : fadeIn * fadeOut;
 
-      if (vis <= 0.005 && (targetScrollY <= 4 || clampedCutoff <= 1 || progress >= 0.995)) {
+      if (vis <= 0.005 && (targetScrollY <= 2 || clampedCutoff <= 1 || progress >= 0.995)) {
         uniforms.uVisibility.value = 0;
         container!.style.opacity = '0';
         container!.style.visibility = 'hidden';
@@ -311,7 +331,7 @@ const {
       }
 
       // Strictly clip smoke to end at the top edge of "What we make"
-      const clipBottom = Math.max(0, window.innerHeight - clampedCutoff);
+      const clipBottom = Math.max(0, viewH - clampedCutoff);
       container!.style.clipPath = `inset(0px 0px ${clipBottom}px 0px)`;
       container!.style.visibility = 'visible';
       container!.style.opacity = '1';
@@ -322,12 +342,13 @@ const {
       uniforms.uScroll.value = progress;
       uniforms.uTime.value = smokeTime;
       uniforms.uVisibility.value = vis;
+      uniforms.uCutoffUv.value = Math.max(0, Math.min(1, 1 - clampedCutoff / Math.max(viewH, 1)));
 
       renderer.render(scene, camera);
       rafId = requestAnimationFrame(animate);
     }
 
-    if (targetScrollY > 4) {
+    if (targetScrollY > 2) {
       onScroll();
     }
 
@@ -336,7 +357,9 @@ const {
       () => {
         if (rafId) cancelAnimationFrame(rafId);
         window.removeEventListener('resize', resize);
+        window.visualViewport?.removeEventListener('resize', resize);
         window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('touchmove', onScroll);
         geometry.dispose();
         material.dispose();
         renderer.dispose();
