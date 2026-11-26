@@ -64,6 +64,30 @@ export const GET: APIRoute = async ({ site }) => {
           caption: 'Official logo of Epso and EPSO BAKERY & STATIONERY WHOLESALE in Cherukulamba, Malappuram district, Kerala',
           geoLocation: geo,
         },
+        {
+          loc: `${siteUrl}/assets/epso_products.webp`,
+          title: 'Epso Food Essentials - Mixtures and Biscuits',
+          caption: 'Epso Dal Mixture, Green Peas Mixture, Peanut Mixture, Payyoli Mixture and biscuit jars',
+          geoLocation: geo,
+        },
+        {
+          loc: `${siteUrl}/assets/epso_products_2.webp`,
+          title: 'Epso Home Care - Liquid Detergent and Floor Cleaners',
+          caption: 'Epso Liquid Detergent and Floor Cleaner bottles in hygienic packaging',
+          geoLocation: geo,
+        },
+        {
+          loc: `${siteUrl}/assets/epso_everyday_essentials.webp`,
+          title: 'Epso Everyday Essentials Built for Indian Homes',
+          caption: 'Epso Everyday Essentials - simple products, reliable packs, fair prices',
+          geoLocation: geo,
+        },
+        {
+          loc: `${siteUrl}/assets/epso_trusted.webp`,
+          title: 'Epso Trusted Quality Checking and Packing',
+          caption: 'Epso quality checking and packaging facility serving Kerala households',
+          geoLocation: geo,
+        },
       ],
     },
     {
