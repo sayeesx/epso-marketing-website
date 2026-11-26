@@ -55,6 +55,29 @@ const orgSchema = {
   },
   image: `${siteUrl}/assets/banners/EPSO-Marketing-Truck-on-Globe.webp`,
   telephone: '+91-98096-65188',
+  email: 'hello@epso.in',
+  hasMap: 'https://share.google/xUXNsXc0cXicOHcHz',
+  contactPoint: [
+    {
+      '@type': 'ContactPoint',
+      contactType: 'customer support',
+      email: 'hello@epso.in',
+      telephone: '+91-98096-65188',
+      availableLanguage: ['English', 'Malayalam'],
+    },
+    {
+      '@type': 'ContactPoint',
+      contactType: 'general inquiries',
+      email: 'contact@epso.in',
+      telephone: '+91-98096-65188',
+    },
+    {
+      '@type': 'ContactPoint',
+      contactType: 'sales',
+      email: 'sales@epso.in',
+      telephone: '+91-98096-65188',
+    },
+  ],
   areaServed: {
     '@type': 'AdministrativeArea',
     name: 'Kerala, India',
@@ -85,7 +108,11 @@ const orgSchema = {
     'Household cleaning products',
     'Wholesale and retail FMCG supply in Malappuram, Kerala',
   ],
-  sameAs: [],
+  sameAs: [
+    'https://www.instagram.com/epso.in',
+    'https://www.facebook.com/epso',
+    'https://www.linkedin.com/company/epso',
+  ],
 };
 
 const websiteSchema = {

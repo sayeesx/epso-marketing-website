@@ -234,8 +234,10 @@ const {
         float expand = smoothstep(0.0, 0.30, uScroll);
         float part   = smoothstep(0.62, 1.0, uScroll);
 
-        // Feather smoothly at the top viewport edge and just above "What we make" (edge0 < edge1 strictly for GLSL ES)
-        float topFade = 1.0 - smoothstep(0.93, 1.0, y);
+        // On desktop, restrict smoke softly to a low band along the bottom edge; on mobile keep full hero band
+        float desktopTopFade = 1.0 - smoothstep(uCutoffUv + 0.06, uCutoffUv + 0.26, y);
+        float fullTopFade = 1.0 - smoothstep(0.93, 1.0, y);
+        float topFade = mix(fullTopFade, desktopTopFade * fullTopFade, step(0.99, uAspect));
         float bottomFade = smoothstep(uCutoffUv, uCutoffUv + 0.06, y);
         float edgeFade = topFade * bottomFade;
 

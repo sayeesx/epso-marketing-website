@@ -1,120 +1,197 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/seo/Breadcrumbs.astro';
 import PhosphorIcon from '../components/ui/PhosphorIcon.astro';
+import { getSiteUrl } from '../lib/siteUrl';
+
+const siteUrl = getSiteUrl(Astro.site);
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Contact', href: '/contact/' },
+];
 
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'ContactPage',
-  name: 'Contact Epso',
+  name: 'Contact Epso & Epso Marketing',
+  url: `${siteUrl}/contact/`,
+  mainEntity: {
+    '@type': 'WholesaleStore',
+    name: 'EPSO BAKERY & STATIONERY WHOLESALE',
+    alternateName: ['Epso', 'Epso Marketing'],
+    telephone: '+91-98096-65188',
+    email: 'hello@epso.in',
+    hasMap: 'https://share.google/xUXNsXc0cXicOHcHz',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'Cherukulamba',
+      addressLocality: 'Cherukulamba',
+      addressRegion: 'Malappuram, Kerala',
+      addressCountry: 'IN',
+    },
+    sameAs: [
+      'https://www.instagram.com/epso.in',
+      'https://www.facebook.com/epso',
+      'https://www.linkedin.com/company/epso',
+    ],
+  },
 };
 ---
 <BaseLayout
   title="Contact Us"
-  description="Have a question about Epso products? Get in touch with us."
+  description="Reach Epso and EPSO BAKERY & STATIONERY WHOLESALE in Cherukulamba, Malappuram, Kerala via WhatsApp, email, phone, social media, or Google Maps."
   structuredData={schema}
 >
   <div class="section-pad">
     <div class="container-site">
-      <div class="mx-auto max-w-xl">
+      <div class="mx-auto max-w-3xl">
+        <Breadcrumbs items={breadcrumbs} />
         <h1 class="mb-2 text-brand-800">Contact us</h1>
-        <p class="mb-8 text-brand-500">Have a question? We are happy to help.</p>
+        <p class="mb-8 text-brand-600">
+          Get in touch with Epso Marketing and EPSO BAKERY &amp; STATIONERY WHOLESALE for retail, wholesale, or product enquiries.
+        </p>
 
-        <div class="glass-panel border-amber-500/25 bg-amber-500/10 p-5 mb-8">
-          <p class="text-sm text-amber-900 font-medium flex items-center gap-2">
-            <PhosphorIcon name="note-pencil" size={18} class="text-amber-800 flex-shrink-0" />
-            <span>This contact form is a placeholder. Configure your WhatsApp number or email in .env and implement your preferred contact method here.</span>
-          </p>
-        </div>
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <!-- Direct Contact & Emails -->
+          <div class="glass-panel p-6 sm:p-7 shadow-glass space-y-5">
+            <h2 class="text-base font-bold text-brand-900 uppercase tracking-wider">Direct contact</h2>
 
-        <div class="glass-panel p-6 sm:p-8 shadow-glass">
-          <form
-            name="contact"
-            method="POST"
-            class="space-y-5"
-            aria-label="Contact form"
-          >
-            <div>
-              <label for="name" class="mb-1.5 block text-sm font-semibold text-brand-800">
-                Your name
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                required
-                autocomplete="name"
-                class="w-full rounded-xl border border-brand-200/80 bg-white/90 px-4 py-2.5 text-sm text-brand-900 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 backdrop-blur-xs"
-                placeholder="Enter your name"
-              />
-            </div>
-            <div>
-              <label for="phone" class="mb-1.5 block text-sm font-semibold text-brand-800">
-                Phone number
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                autocomplete="tel"
-                class="w-full rounded-xl border border-brand-200/80 bg-white/90 px-4 py-2.5 text-sm text-brand-900 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 backdrop-blur-xs"
-                placeholder="+91 XXXXX XXXXX"
-              />
-            </div>
-            <div>
-              <label for="email" class="mb-1.5 block text-sm font-semibold text-brand-800">
-                Email address
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                autocomplete="email"
-                class="w-full rounded-xl border border-brand-200/80 bg-white/90 px-4 py-2.5 text-sm text-brand-900 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 backdrop-blur-xs"
-                placeholder="your@email.com"
-              />
-            </div>
-            <div>
-              <label for="message" class="mb-1.5 block text-sm font-semibold text-brand-800">
-                Your message
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                rows="4"
-                required
-                class="w-full rounded-xl border border-brand-200/80 bg-white/90 px-4 py-2.5 text-sm text-brand-900 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 resize-none backdrop-blur-xs"
-                placeholder="Tell us what you need..."
-              ></textarea>
-            </div>
-            <button type="submit" class="btn-accent w-full py-3 text-base font-semibold">Send message</button>
-          </form>
-        </div>
+            <div class="space-y-3.5 text-sm text-brand-700">
+              <p class="flex items-center gap-3">
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#25D366]/15 flex-shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="#25D366" aria-hidden="true">
+                    <path d="M12.031 2c-5.516 0-9.969 4.453-9.969 9.969 0 1.766.469 3.484 1.344 5l-1.406 5.156 5.281-1.375c1.469.797 3.109 1.219 4.75 1.219 5.516 0 9.969-4.453 9.969-9.969s-4.453-10-9.969-10zm5.813 14.125c-.25.703-1.438 1.344-2 1.422-.531.078-1.203.109-1.953-.125-.453-.141-1.047-.344-1.781-.656-3.125-1.359-5.156-4.531-5.313-4.734-.156-.203-1.266-1.688-1.266-3.219s.797-2.281 1.078-2.594c.281-.313.609-.391.813-.391.203 0 .406 0 .578.016.188.016.438-.078.688.516.25.609.859 2.094.938 2.25.078.156.125.344.016.547-.109.203-.156.328-.313.516-.156.188-.328.422-.469.563-.156.156-.313.328-.141.641.172.313.781 1.297 1.672 2.094 1.156 1.031 2.125 1.359 2.438 1.516.313.156.484.125.672-.078.188-.203.781-.906.984-1.219.203-.313.422-.266.703-.156.281.109 1.813.859 2.125 1.016.313.156.516.234.594.359.078.125.078.734-.172 1.438z"/>
+                  </svg>
+                </span>
+                <span>
+                  <span class="block text-xs text-brand-500">WhatsApp</span>
+                  <a href="https://wa.me/919809665188" target="_blank" rel="noopener noreferrer" class="font-semibold text-brand-900 hover:underline">
+                    +91 98096 65188
+                  </a>
+                </span>
+              </p>
 
-        <div class="mt-8 glass-panel p-6">
-          <h2 class="mb-3 text-sm font-bold text-brand-900 uppercase tracking-wider">Other ways to reach us</h2>
-          <div class="space-y-3 text-sm text-brand-700">
-            <p class="flex items-start gap-2.5">
-              <PhosphorIcon name="map-pin" size={18} class="text-amber-700 flex-shrink-0 mt-0.5" />
-              <span>Location: <strong class="text-brand-900">EPSO BAKERY &amp; STATIONERY WHOLESALE</strong>, Cherukulamba, Malappuram district, Kerala (Wholesale &amp; retail supplier)</span>
-            </p>
-            <p class="flex items-center gap-2.5">
-              <PhosphorIcon name="phone" size={18} class="text-amber-700 flex-shrink-0" />
-              <span>Phone: <a href="tel:+919809665188" class="font-semibold text-brand-900 hover:underline">+91 98096 65188</a></span>
-            </p>
-            <p class="flex items-center gap-2.5">
-              <PhosphorIcon name="envelope-simple" size={18} class="text-amber-700 flex-shrink-0" />
-              <span>Email: <em>[To be updated]</em></span>
-            </p>
-            <p class="flex items-center gap-2.5">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="#25D366" class="flex-shrink-0" aria-hidden="true">
-                <path d="M12.031 2c-5.516 0-9.969 4.453-9.969 9.969 0 1.766.469 3.484 1.344 5l-1.406 5.156 5.281-1.375c1.469.797 3.109 1.219 4.75 1.219 5.516 0 9.969-4.453 9.969-9.969s-4.453-10-9.969-10zm5.813 14.125c-.25.703-1.438 1.344-2 1.422-.531.078-1.203.109-1.953-.125-.453-.141-1.047-.344-1.781-.656-3.125-1.359-5.156-4.531-5.313-4.734-.156-.203-1.266-1.688-1.266-3.219s.797-2.281 1.078-2.594c.281-.313.609-.391.813-.391.203 0 .406 0 .578.016.188.016.438-.078.688.516.25.609.859 2.094.938 2.25.078.156.125.344.016.547-.109.203-.156.328-.313.516-.156.188-.328.422-.469.563-.156.156-.313.328-.141.641.172.313.781 1.297 1.672 2.094 1.156 1.031 2.125 1.359 2.438 1.516.313.156.484.125.672-.078.188-.203.781-.906.984-1.219.203-.313.422-.266.703-.156.281.109 1.813.859 2.125 1.016.313.156.516.234.594.359.078.125.078.734-.172 1.438z"/>
-              </svg>
-              <span>WhatsApp: <a href="https://wa.me/919809665188" target="_blank" rel="noopener noreferrer" class="font-semibold text-brand-900 hover:underline">+91 98096 65188</a></span>
-            </p>
+              <p class="flex items-center gap-3">
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/15 flex-shrink-0">
+                  <PhosphorIcon name="phone" size={18} class="text-amber-700" />
+                </span>
+                <span>
+                  <span class="block text-xs text-brand-500">Phone</span>
+                  <a href="tel:+919809665188" class="font-semibold text-brand-900 hover:underline">+91 98096 65188</a>
+                </span>
+              </p>
+
+              <p class="flex items-start gap-3">
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/15 flex-shrink-0 mt-0.5">
+                  <PhosphorIcon name="envelope-simple" size={18} class="text-amber-700" />
+                </span>
+                <span class="space-y-1">
+                  <span class="block text-xs text-brand-500">Email</span>
+                  <span class="block">
+                    General: <a href="mailto:hello@epso.in" class="font-semibold text-brand-900 hover:underline">hello@epso.in</a>
+                  </span>
+                  <span class="block">
+                    Enquiries: <a href="mailto:contact@epso.in" class="font-semibold text-brand-900 hover:underline">contact@epso.in</a>
+                  </span>
+                  <span class="block">
+                    Sales &amp; Wholesale: <a href="mailto:sales@epso.in" class="font-semibold text-brand-900 hover:underline">sales@epso.in</a>
+                  </span>
+                </span>
+              </p>
+            </div>
+
+            <div class="pt-2">
+              <a
+                href="https://wa.me/919809665188"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-accent w-full py-3 text-sm font-semibold inline-flex items-center justify-center gap-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+                  <path d="M12.031 2c-5.516 0-9.969 4.453-9.969 9.969 0 1.766.469 3.484 1.344 5l-1.406 5.156 5.281-1.375c1.469.797 3.109 1.219 4.75 1.219 5.516 0 9.969-4.453 9.969-9.969s-4.453-10-9.969-10zm5.813 14.125c-.25.703-1.438 1.344-2 1.422-.531.078-1.203.109-1.953-.125-.453-.141-1.047-.344-1.781-.656-3.125-1.359-5.156-4.531-5.313-4.734-.156-.203-1.266-1.688-1.266-3.219s.797-2.281 1.078-2.594c.281-.313.609-.391.813-.391.203 0 .406 0 .578.016.188.016.438-.078.688.516.25.609.859 2.094.938 2.25.078.156.125.344.016.547-.109.203-.156.328-.313.516-.156.188-.328.422-.469.563-.156.156-.313.328-.141.641.172.313.781 1.297 1.672 2.094 1.156 1.031 2.125 1.359 2.438 1.516.313.156.484.125.672-.078.188-.203.781-.906.984-1.219.203-.313.422-.266.703-.156.281.109 1.813.859 2.125 1.016.313.156.516.234.594.359.078.125.078.734-.172 1.438z"/>
+                </svg>
+                <span>Chat on WhatsApp</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Location & Social Links -->
+          <div class="space-y-6">
+            <div class="glass-panel p-6 sm:p-7 shadow-glass space-y-4">
+              <h2 class="text-base font-bold text-brand-900 uppercase tracking-wider">Location &amp; Map</h2>
+              <p class="flex items-start gap-2.5 text-sm text-brand-700 leading-relaxed">
+                <PhosphorIcon name="map-pin" size={18} class="text-amber-700 flex-shrink-0 mt-0.5" />
+                <span>
+                  <strong class="text-brand-900 block">EPSO BAKERY &amp; STATIONERY WHOLESALE</strong>
+                  Wholesale &amp; retail supplier located in Cherukulamba, Malappuram district, Kerala
+                </span>
+              </p>
+              <a
+                href="https://share.google/xUXNsXc0cXicOHcHz"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-secondary w-full py-2.5 text-sm font-semibold inline-flex items-center justify-center gap-2"
+              >
+                <PhosphorIcon name="map-pin" size={16} class="text-amber-700" />
+                <span>View on Google Maps</span>
+              </a>
+            </div>
+
+            <div class="glass-panel p-6 sm:p-7 shadow-glass space-y-4">
+              <h2 class="text-base font-bold text-brand-900 uppercase tracking-wider">Follow Epso</h2>
+              <div class="grid grid-cols-1 gap-2.5 text-sm">
+                <a
+                  href="https://www.instagram.com/epso.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex items-center justify-between rounded-xl border border-brand-200/80 bg-white/80 px-4 py-2.5 font-semibold text-brand-900 hover:border-[#E4405F]/50 hover:bg-white transition-colors"
+                >
+                  <span class="inline-flex items-center gap-2.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E4405F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                    </svg>
+                    <span>Instagram</span>
+                  </span>
+                  <span class="text-xs font-medium text-brand-500">instagram.com/epso.in</span>
+                </a>
+
+                <a
+                  href="https://www.facebook.com/epso"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex items-center justify-between rounded-xl border border-brand-200/80 bg-white/80 px-4 py-2.5 font-semibold text-brand-900 hover:border-[#1877F2]/50 hover:bg-white transition-colors"
+                >
+                  <span class="inline-flex items-center gap-2.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#1877F2" aria-hidden="true">
+                      <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/>
+                    </svg>
+                    <span>Facebook</span>
+                  </span>
+                  <span class="text-xs font-medium text-brand-500">facebook.com/epso</span>
+                </a>
+
+                <a
+                  href="https://www.linkedin.com/company/epso"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex items-center justify-between rounded-xl border border-brand-200/80 bg-white/80 px-4 py-2.5 font-semibold text-brand-900 hover:border-[#0A66C2]/50 hover:bg-white transition-colors"
+                >
+                  <span class="inline-flex items-center gap-2.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#0A66C2" aria-hidden="true">
+                      <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+                    </svg>
+                    <span>LinkedIn</span>
+                  </span>
+                  <span class="text-xs font-medium text-brand-500">linkedin.com/company/epso</span>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </BaseLayout>
-

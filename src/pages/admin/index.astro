@@ -68,7 +68,22 @@ import '@/styles/global.css';
 
         <!-- Admin actions top bar (only visible after login) -->
         <div id="admin-topbar-actions" class="hidden mb-6 flex-wrap items-center justify-between gap-4 border-b border-brand-200 pb-4">
-          <span class="text-lg font-bold text-brand-950">Products</span>
+          <div class="flex items-center gap-2">
+            <button
+              id="tab-products"
+              type="button"
+              class="rounded-full bg-brand-900 text-white px-4 py-1.5 text-sm font-semibold transition-colors"
+            >
+              Products
+            </button>
+            <button
+              id="tab-blog"
+              type="button"
+              class="rounded-full border border-brand-300 bg-white text-brand-800 px-4 py-1.5 text-sm font-semibold hover:bg-brand-50 transition-colors"
+            >
+              Blog
+            </button>
+          </div>
           <div class="flex items-center gap-3">
             <span id="admin-user-label" class="text-xs font-medium text-brand-600"></span>
             <button
@@ -305,6 +320,182 @@ import '@/styles/global.css';
           </div>
         </div>
       </div>
+
+      <!-- STEP 3: BLOG MANAGEMENT DASHBOARD -->
+      <div id="admin-blog-view" class="hidden grid-cols-1 gap-8 lg:grid-cols-12">
+        <!-- Left column: Create / Edit Blog Form -->
+        <div class="lg:col-span-5">
+          <div class="rounded-3xl border border-brand-200 bg-white p-6 sm:p-7">
+            <div class="mb-5 flex items-center justify-between gap-2">
+              <h2 id="blog-form-heading" class="text-lg font-bold text-brand-950">Write New Article</h2>
+              <button id="btn-reset-blog" type="button" class="hidden text-xs font-semibold text-[#eb8d35] hover:underline">
+                Cancel edit
+              </button>
+            </div>
+
+            <form id="blog-form" class="space-y-4">
+              <input type="hidden" id="editing-blog-id" value="" />
+              <input type="hidden" id="existing-blog-image-ref" value="" />
+
+              <div>
+                <label for="blog-title" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5">
+                  Article Title *
+                </label>
+                <input
+                  id="blog-title"
+                  type="text"
+                  required
+                  minlength="5"
+                  maxlength="120"
+                  placeholder="e.g. Kerala Mixture & Everyday Snacks by Epso"
+                  class="w-full rounded-xl border border-brand-300 bg-white px-3.5 py-2.5 text-sm text-brand-950 focus:border-[#eb8d35] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label for="blog-slug" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5">
+                  URL Slug *
+                </label>
+                <input
+                  id="blog-slug"
+                  type="text"
+                  required
+                  placeholder="kerala-mixture-everyday-snacks"
+                  class="w-full rounded-xl border border-brand-300 bg-brand-50/50 px-3.5 py-2 text-xs font-mono text-brand-800 focus:border-[#eb8d35] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label for="blog-date" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5">
+                  Published Date
+                </label>
+                <input
+                  id="blog-date"
+                  type="date"
+                  class="w-full rounded-xl border border-brand-300 bg-white px-3.5 py-2 text-sm text-brand-950 focus:border-[#eb8d35] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label for="blog-image" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5">
+                  Main Image
+                </label>
+                <div class="flex items-center gap-4">
+                  <div class="h-16 w-24 flex-shrink-0 overflow-hidden rounded-xl border border-brand-200 bg-brand-50 flex items-center justify-center">
+                    <img
+                      id="blog-image-preview"
+                      src="/assets/banners/EPSO-Marketing-Truck-on-Globe.webp"
+                      alt="Blog image preview"
+                      class="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div class="flex-1">
+                    <input
+                      id="blog-image"
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/avif"
+                      class="block w-full text-xs text-brand-600 file:mr-3 file:rounded-full file:border file:border-brand-300 file:bg-white file:px-3.5 file:py-1.5 file:text-xs file:font-semibold file:text-brand-800 hover:file:bg-brand-50 cursor-pointer"
+                    />
+                    <p class="mt-1 text-[11px] text-brand-500">1200×630 or 16:9 WebP/PNG/JPG recommended.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label for="blog-image-alt" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5">
+                  Image Alt Text
+                </label>
+                <input
+                  id="blog-image-alt"
+                  type="text"
+                  placeholder="Describe the article image for search engines"
+                  class="w-full rounded-xl border border-brand-300 bg-white px-3.5 py-2 text-sm text-brand-950 focus:border-[#eb8d35] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label for="blog-excerpt" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5">
+                  Short Summary (Excerpt)
+                </label>
+                <textarea
+                  id="blog-excerpt"
+                  rows="2"
+                  maxlength="300"
+                  placeholder="Short summary shown on the blog listing page..."
+                  class="w-full rounded-xl border border-brand-300 bg-white px-3.5 py-2 text-sm text-brand-950 focus:border-[#eb8d35] focus:outline-none resize-none"
+                ></textarea>
+              </div>
+
+              <div>
+                <label for="blog-body" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5">
+                  Article Content <span class="font-normal text-brand-400">(use ## Heading, - Bullet, blank line for paragraphs)</span>
+                </label>
+                <textarea
+                  id="blog-body"
+                  rows="8"
+                  placeholder="## Why Epso snacks stand out&#10;&#10;Write your article paragraphs here...&#10;&#10;- Bullet point one&#10;- Bullet point two"
+                  class="w-full rounded-xl border border-brand-300 bg-white px-3.5 py-2 text-sm text-brand-950 focus:border-[#eb8d35] focus:outline-none"
+                ></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label for="blog-seo-title" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5">
+                    SEO Title
+                  </label>
+                  <input
+                    id="blog-seo-title"
+                    type="text"
+                    maxlength="60"
+                    placeholder="Optional (max 60 chars)"
+                    class="w-full rounded-xl border border-brand-300 bg-white px-3.5 py-2 text-xs text-brand-950 focus:border-[#eb8d35] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label for="blog-seo-desc" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5">
+                    SEO Description
+                  </label>
+                  <input
+                    id="blog-seo-desc"
+                    type="text"
+                    maxlength="160"
+                    placeholder="Optional (max 160 chars)"
+                    class="w-full rounded-xl border border-brand-300 bg-white px-3.5 py-2 text-xs text-brand-950 focus:border-[#eb8d35] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <button id="btn-save-blog" type="submit" class="btn-primary w-full py-3 text-sm font-semibold">
+                Save &amp; Publish Article
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Right column: Blog Articles in Sanity -->
+        <div class="lg:col-span-7">
+          <div class="rounded-3xl border border-brand-200 bg-white p-6 sm:p-7">
+            <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 class="text-lg font-bold text-brand-950">Blog Articles in Sanity</h2>
+                <p id="blogs-count" class="text-xs text-brand-500 mt-0.5">Loading...</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <button id="btn-seed-blogs" type="button" class="text-xs font-semibold text-[#eb8d35] hover:underline px-2 py-1">
+                  + Import Built-in Articles
+                </button>
+                <button id="btn-refresh-blogs" type="button" class="btn-secondary text-xs px-4 py-1.5">
+                  Refresh
+                </button>
+              </div>
+            </div>
+
+            <div id="blogs-list" class="space-y-3">
+              <p class="py-12 text-center text-sm text-brand-400">Loading blog articles from Sanity...</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     </main>
 
@@ -343,11 +534,42 @@ import '@/styles/global.css';
       slug?: string;
     }
 
+    interface AdminBlogBlock {
+      _type?: string;
+      style?: string;
+      listItem?: string;
+      children?: Array<{ text?: string }>;
+    }
+
+    interface AdminBlogPost {
+      _id: string;
+      title: string;
+      slug?: { current?: string } | string;
+      publishedAt?: string;
+      excerpt?: string;
+      body?: AdminBlogBlock[];
+      mainImage?: {
+        _type: 'image';
+        asset?: { _ref?: string; _type?: 'reference' };
+        alt?: string;
+      };
+      imageUrl?: string;
+      seo?: {
+        title?: string;
+        description?: string;
+      };
+    }
+
     let categories: AdminCategory[] = [];
     let products: AdminProduct[] = [];
+    let blogPosts: AdminBlogPost[] = [];
+    let activeTab: 'products' | 'blog' = 'products';
 
     const loginView = document.getElementById('admin-login-view') as HTMLElement | null;
     const dashboardView = document.getElementById('admin-dashboard-view') as HTMLElement | null;
+    const blogView = document.getElementById('admin-blog-view') as HTMLElement | null;
+    const tabProductsBtn = document.getElementById('tab-products') as HTMLButtonElement | null;
+    const tabBlogBtn = document.getElementById('tab-blog') as HTMLButtonElement | null;
     const topbarActions = document.getElementById('admin-topbar-actions') as HTMLElement | null;
     const userLabel = document.getElementById('admin-user-label') as HTMLElement | null;
     const toastEl = document.getElementById('admin-toast') as HTMLElement | null;
@@ -386,6 +608,27 @@ import '@/styles/global.css';
 
     const productsList = document.getElementById('products-list') as HTMLElement | null;
     const productsCount = document.getElementById('products-count') as HTMLElement | null;
+
+    const blogForm = document.getElementById('blog-form') as HTMLFormElement | null;
+    const blogFormHeading = document.getElementById('blog-form-heading') as HTMLElement | null;
+    const btnResetBlog = document.getElementById('btn-reset-blog') as HTMLButtonElement | null;
+    const editingBlogIdInput = document.getElementById('editing-blog-id') as HTMLInputElement | null;
+    const existingBlogImgRefInput = document.getElementById('existing-blog-image-ref') as HTMLInputElement | null;
+    const blogTitleInput = document.getElementById('blog-title') as HTMLInputElement | null;
+    const blogSlugInput = document.getElementById('blog-slug') as HTMLInputElement | null;
+    const blogDateInput = document.getElementById('blog-date') as HTMLInputElement | null;
+    const blogImageInput = document.getElementById('blog-image') as HTMLInputElement | null;
+    const blogImagePreview = document.getElementById('blog-image-preview') as HTMLImageElement | null;
+    const blogImageAltInput = document.getElementById('blog-image-alt') as HTMLInputElement | null;
+    const blogExcerptInput = document.getElementById('blog-excerpt') as HTMLTextAreaElement | null;
+    const blogBodyInput = document.getElementById('blog-body') as HTMLTextAreaElement | null;
+    const blogSeoTitleInput = document.getElementById('blog-seo-title') as HTMLInputElement | null;
+    const blogSeoDescInput = document.getElementById('blog-seo-desc') as HTMLInputElement | null;
+    const btnSaveBlog = document.getElementById('btn-save-blog') as HTMLButtonElement | null;
+    const btnSeedBlogs = document.getElementById('btn-seed-blogs') as HTMLButtonElement | null;
+    const btnRefreshBlogs = document.getElementById('btn-refresh-blogs') as HTMLButtonElement | null;
+    const blogsList = document.getElementById('blogs-list') as HTMLElement | null;
+    const blogsCount = document.getElementById('blogs-count') as HTMLElement | null;
 
     function showToast(msg: string, type: 'success' | 'error' | 'info' = 'info') {
       if (!toastEl) return;
@@ -433,21 +676,46 @@ import '@/styles/global.css';
     function showLoginView() {
       dashboardView?.classList.add('hidden');
       dashboardView?.classList.remove('grid');
+      blogView?.classList.add('hidden');
+      blogView?.classList.remove('grid');
       topbarActions?.classList.add('hidden');
       topbarActions?.classList.remove('flex');
       loginView?.classList.remove('hidden');
     }
 
+    function switchTab(tab: 'products' | 'blog') {
+      activeTab = tab;
+      const activeCls = 'rounded-full bg-brand-900 text-white px-4 py-1.5 text-sm font-semibold transition-colors';
+      const inactiveCls = 'rounded-full border border-brand-300 bg-white text-brand-800 px-4 py-1.5 text-sm font-semibold hover:bg-brand-50 transition-colors';
+      if (tab === 'products') {
+        dashboardView?.classList.remove('hidden');
+        dashboardView?.classList.add('grid');
+        blogView?.classList.add('hidden');
+        blogView?.classList.remove('grid');
+        if (tabProductsBtn) tabProductsBtn.className = activeCls;
+        if (tabBlogBtn) tabBlogBtn.className = inactiveCls;
+      } else {
+        blogView?.classList.remove('hidden');
+        blogView?.classList.add('grid');
+        dashboardView?.classList.add('hidden');
+        dashboardView?.classList.remove('grid');
+        if (tabBlogBtn) tabBlogBtn.className = activeCls;
+        if (tabProductsBtn) tabProductsBtn.className = inactiveCls;
+      }
+    }
+
     function showDashboardView(email?: string) {
       loginView?.classList.add('hidden');
-      dashboardView?.classList.remove('hidden');
-      dashboardView?.classList.add('grid');
       topbarActions?.classList.remove('hidden');
       topbarActions?.classList.add('flex');
+      switchTab(activeTab);
       if (userLabel && email) {
         userLabel.textContent = email;
       }
     }
+
+    tabProductsBtn?.addEventListener('click', () => switchTab('products'));
+    tabBlogBtn?.addEventListener('click', () => switchTab('blog'));
 
     function addSizeRow(size = '', unit = 'g') {
       if (!sizesList) return;
@@ -507,11 +775,17 @@ import '@/styles/global.css';
 
     async function loadData() {
       try {
-        const res = await apiCall<{ categories: AdminCategory[]; products: AdminProduct[] }>('data');
+        const res = await apiCall<{
+          categories: AdminCategory[];
+          products: AdminProduct[];
+          blogPosts: AdminBlogPost[];
+        }>('data');
         categories = res.categories || [];
         products = res.products || [];
+        blogPosts = res.blogPosts || [];
         renderCategories();
         renderProducts();
+        renderBlogs();
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Failed to load data from Sanity.';
         showToast(msg, 'error');
@@ -799,6 +1073,7 @@ import '@/styles/global.css';
         if (res.authenticated) {
           showDashboardView(res.email);
           resetForm();
+          resetBlogForm();
           await loadData();
           showToast('Signed in.', 'success');
         }
@@ -824,6 +1099,302 @@ import '@/styles/global.css';
     });
 
     btnRefresh?.addEventListener('click', () => loadData());
+    btnRefreshBlogs?.addEventListener('click', () => loadData());
+
+    let blogSlugManuallyEdited = false;
+    blogTitleInput?.addEventListener('input', () => {
+      if (!blogSlugManuallyEdited && !editingBlogIdInput?.value && blogSlugInput && blogTitleInput) {
+        blogSlugInput.value = slugify(blogTitleInput.value);
+      }
+    });
+    blogSlugInput?.addEventListener('input', () => {
+      blogSlugManuallyEdited = true;
+    });
+
+    blogImageInput?.addEventListener('change', () => {
+      const file = blogImageInput.files?.[0];
+      if (file && blogImagePreview) {
+        blogImagePreview.src = URL.createObjectURL(file);
+        if (blogImageAltInput && !blogImageAltInput.value && blogTitleInput?.value) {
+          blogImageAltInput.value = blogTitleInput.value;
+        }
+      }
+    });
+
+    function resetBlogForm() {
+      if (!blogForm) return;
+      blogForm.reset();
+      if (editingBlogIdInput) editingBlogIdInput.value = '';
+      if (existingBlogImgRefInput) existingBlogImgRefInput.value = '';
+      if (blogImagePreview) blogImagePreview.src = '/assets/banners/EPSO-Marketing-Truck-on-Globe.webp';
+      if (blogDateInput) blogDateInput.value = new Date().toISOString().slice(0, 10);
+      if (blogFormHeading) blogFormHeading.textContent = 'Write New Article';
+      if (btnSaveBlog) btnSaveBlog.textContent = 'Save & Publish Article';
+      btnResetBlog?.classList.add('hidden');
+      blogSlugManuallyEdited = false;
+    }
+
+    btnResetBlog?.addEventListener('click', () => resetBlogForm());
+
+    function blocksToMarkdown(blocks: AdminBlogBlock[] = []): string {
+      return blocks
+        .map((block) => {
+          const text = (block.children || []).map((c) => c.text || '').join('').trim();
+          if (!text) return '';
+          if (block.listItem === 'bullet') return `- ${text}`;
+          if (block.style === 'h2') return `## ${text}`;
+          if (block.style === 'h3') return `### ${text}`;
+          if (block.style === 'blockquote') return `> ${text}`;
+          return text;
+        })
+        .filter(Boolean)
+        .join('\n\n');
+    }
+
+    function markdownToBlocks(text: string) {
+      const lines = text.split(/\r?\n/);
+      const blocks: Array<Record<string, unknown>> = [];
+      let buffer: string[] = [];
+
+      const flushBuffer = () => {
+        if (buffer.length === 0) return;
+        const para = buffer.join(' ').trim();
+        if (para) {
+          blocks.push({
+            _type: 'block',
+            _key: randomKey(),
+            style: 'normal',
+            markDefs: [],
+            children: [{ _type: 'span', _key: randomKey(), text: para, marks: [] }],
+          });
+        }
+        buffer = [];
+      };
+
+      for (const rawLine of lines) {
+        const line = rawLine.trim();
+        if (!line) {
+          flushBuffer();
+          continue;
+        }
+        if (line.startsWith('### ')) {
+          flushBuffer();
+          blocks.push({
+            _type: 'block',
+            _key: randomKey(),
+            style: 'h3',
+            markDefs: [],
+            children: [{ _type: 'span', _key: randomKey(), text: line.slice(4).trim(), marks: [] }],
+          });
+        } else if (line.startsWith('## ')) {
+          flushBuffer();
+          blocks.push({
+            _type: 'block',
+            _key: randomKey(),
+            style: 'h2',
+            markDefs: [],
+            children: [{ _type: 'span', _key: randomKey(), text: line.slice(3).trim(), marks: [] }],
+          });
+        } else if (line.startsWith('- ') || line.startsWith('* ')) {
+          flushBuffer();
+          blocks.push({
+            _type: 'block',
+            _key: randomKey(),
+            style: 'normal',
+            listItem: 'bullet',
+            level: 1,
+            markDefs: [],
+            children: [{ _type: 'span', _key: randomKey(), text: line.slice(2).trim(), marks: [] }],
+          });
+        } else if (line.startsWith('> ')) {
+          flushBuffer();
+          blocks.push({
+            _type: 'block',
+            _key: randomKey(),
+            style: 'blockquote',
+            markDefs: [],
+            children: [{ _type: 'span', _key: randomKey(), text: line.slice(2).trim(), marks: [] }],
+          });
+        } else {
+          buffer.push(line);
+        }
+      }
+      flushBuffer();
+      return blocks;
+    }
+
+    function renderBlogs() {
+      if (!blogsList || !blogsCount) return;
+      blogsCount.textContent = `${blogPosts.length} blog article${blogPosts.length === 1 ? '' : 's'} stored in Sanity`;
+
+      if (blogPosts.length === 0) {
+        blogsList.innerHTML =
+          '<p class="py-12 text-center text-sm text-brand-500">No blog articles in Sanity yet. Write one on the left or click "+ Import Built-in Articles" to edit the existing site articles.</p>';
+        return;
+      }
+
+      blogsList.innerHTML = '';
+      blogPosts.forEach((b) => {
+        const slugStr = typeof b.slug === 'string' ? b.slug : b.slug?.current || '';
+        const card = document.createElement('div');
+        card.className = 'flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-brand-200 p-4 hover:border-brand-300 transition-colors';
+        const imgUrl = b.imageUrl ? `${b.imageUrl}?w=200&h=120&fit=crop&auto=format` : '/assets/banners/EPSO-Marketing-Truck-on-Globe.webp';
+        const dateLabel = b.publishedAt
+          ? new Date(b.publishedAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })
+          : 'Unscheduled';
+
+        card.innerHTML = `
+          <div class="flex items-center gap-3.5 min-w-0">
+            <img src="${imgUrl}" alt="${b.title.replace(/"/g, '&quot;')}" class="h-14 w-20 flex-shrink-0 rounded-xl border border-brand-100 bg-brand-50 object-cover" />
+            <div class="min-w-0">
+              <h3 class="font-semibold text-sm text-brand-950 truncate">${b.title}</h3>
+              <p class="text-xs text-brand-500 mt-0.5 truncate">${dateLabel} &middot; /blog/${slugStr}/</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 flex-shrink-0">
+            <button type="button" data-action="edit-blog" class="rounded-full border border-brand-300 bg-white px-3 py-1 text-xs font-semibold text-brand-800 hover:bg-brand-50">Edit</button>
+            <button type="button" data-action="delete-blog" class="rounded-full border border-red-200 bg-white px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-50">Delete</button>
+          </div>
+        `;
+
+        card.querySelector('[data-action="edit-blog"]')?.addEventListener('click', () => populateBlogForEdit(b));
+        card.querySelector('[data-action="delete-blog"]')?.addEventListener('click', () => deleteBlog(b));
+        blogsList.appendChild(card);
+      });
+    }
+
+    function populateBlogForEdit(b: AdminBlogPost) {
+      blogSlugManuallyEdited = true;
+      if (editingBlogIdInput) editingBlogIdInput.value = b._id;
+      if (existingBlogImgRefInput) existingBlogImgRefInput.value = b.mainImage?.asset?._ref || '';
+      if (blogTitleInput) blogTitleInput.value = b.title || '';
+      if (blogSlugInput) blogSlugInput.value = typeof b.slug === 'string' ? b.slug : b.slug?.current || '';
+      if (blogDateInput) {
+        blogDateInput.value = b.publishedAt ? b.publishedAt.slice(0, 10) : '';
+      }
+      if (blogImageInput) blogImageInput.value = '';
+      if (blogImagePreview) {
+        blogImagePreview.src = b.imageUrl ? `${b.imageUrl}?w=400&auto=format` : '/assets/banners/EPSO-Marketing-Truck-on-Globe.webp';
+      }
+      if (blogImageAltInput) blogImageAltInput.value = b.mainImage?.alt || b.title || '';
+      if (blogExcerptInput) blogExcerptInput.value = b.excerpt || '';
+      if (blogBodyInput) blogBodyInput.value = blocksToMarkdown(b.body || []);
+      if (blogSeoTitleInput) blogSeoTitleInput.value = b.seo?.title || '';
+      if (blogSeoDescInput) blogSeoDescInput.value = b.seo?.description || '';
+      if (blogFormHeading) blogFormHeading.textContent = `Editing: ${b.title}`;
+      if (btnSaveBlog) btnSaveBlog.textContent = 'Update Blog Article';
+      btnResetBlog?.classList.remove('hidden');
+      blogForm?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function deleteBlog(b: AdminBlogPost) {
+      if (!window.confirm(`Delete article "${b.title}" permanently from Sanity?`)) return;
+      try {
+        await apiCall('deleteBlog', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: b._id }),
+        });
+        showToast(`Deleted "${b.title}".`, 'success');
+        if (editingBlogIdInput?.value === b._id) resetBlogForm();
+        await loadData();
+      } catch (err) {
+        showToast(err instanceof Error ? err.message : 'Delete failed', 'error');
+      }
+    }
+
+    btnSeedBlogs?.addEventListener('click', async () => {
+      btnSeedBlogs.disabled = true;
+      try {
+        const res = await apiCall<{ created: number }>('importDefaultBlogs', { method: 'POST' });
+        showToast(
+          res.created > 0
+            ? `Imported ${res.created} built-in blog article${res.created === 1 ? '' : 's'} into Sanity!`
+            : 'All built-in articles are already in Sanity.',
+          res.created > 0 ? 'success' : 'info'
+        );
+        await loadData();
+      } catch (err) {
+        showToast(err instanceof Error ? err.message : 'Import failed', 'error');
+      } finally {
+        btnSeedBlogs.disabled = false;
+      }
+    });
+
+    blogForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!btnSaveBlog) return;
+
+      const title = blogTitleInput?.value.trim() || '';
+      const slugVal = slugify(blogSlugInput?.value || title);
+      if (!title || !slugVal) {
+        showToast('Please enter a valid article title and URL slug.', 'error');
+        return;
+      }
+
+      btnSaveBlog.disabled = true;
+      const originalText = btnSaveBlog.textContent || 'Save';
+      btnSaveBlog.textContent = 'Saving to Sanity...';
+
+      try {
+        let imageAssetRef = existingBlogImgRefInput?.value || '';
+        const newFile = blogImageInput?.files?.[0];
+        if (newFile) {
+          const fd = new FormData();
+          fd.append('file', newFile);
+          const uploaded = await apiCall<{ assetId?: string }>('upload', {
+            method: 'POST',
+            body: fd,
+          });
+          if (uploaded.assetId) imageAssetRef = uploaded.assetId;
+        }
+
+        const bodyBlocks = markdownToBlocks(blogBodyInput?.value || '');
+        const dateVal = blogDateInput?.value;
+        const publishedAt = dateVal ? `${dateVal}T09:00:00.000Z` : new Date().toISOString();
+
+        const payload: Record<string, unknown> = {
+          title,
+          slug: { _type: 'slug', current: slugVal },
+          publishedAt,
+          excerpt: blogExcerptInput?.value.trim() || undefined,
+          body: bodyBlocks.length > 0 ? bodyBlocks : undefined,
+        };
+
+        const seoTitle = blogSeoTitleInput?.value.trim();
+        const seoDesc = blogSeoDescInput?.value.trim();
+        if (seoTitle || seoDesc) {
+          payload.seo = {
+            ...(seoTitle ? { title: seoTitle } : {}),
+            ...(seoDesc ? { description: seoDesc } : {}),
+          };
+        }
+
+        if (imageAssetRef) {
+          payload.mainImage = {
+            _type: 'image',
+            asset: { _type: 'reference', _ref: imageAssetRef },
+            alt: blogImageAltInput?.value.trim() || title,
+          };
+        }
+
+        const editingId = editingBlogIdInput?.value;
+        await apiCall('saveBlog', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ editingId: editingId || undefined, payload }),
+        });
+
+        showToast(editingId ? `Updated "${title}" in Sanity!` : `Published "${title}" to Sanity!`, 'success');
+        resetBlogForm();
+        await loadData();
+      } catch (err) {
+        showToast(err instanceof Error ? err.message : 'Failed to save blog article.', 'error');
+      } finally {
+        btnSaveBlog.disabled = false;
+        btnSaveBlog.textContent = originalText;
+      }
+    });
 
     // Check active session on page load
     apiCall<{ authenticated: boolean; email?: string }>('session')
@@ -831,6 +1402,7 @@ import '@/styles/global.css';
         if (res.authenticated) {
           showDashboardView(res.email);
           resetForm();
+          resetBlogForm();
           loadData();
         }
       })

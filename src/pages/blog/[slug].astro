@@ -101,6 +101,29 @@ const breadcrumbs = [
 ];
 
 const relatedLocalPosts = localBlogPosts.filter((p) => p.slug !== slug).slice(0, 2);
+
+interface PortableTextSpan {
+  _type?: string;
+  text?: string;
+  marks?: string[];
+}
+
+interface PortableTextBlock {
+  _type?: string;
+  style?: string;
+  listItem?: string;
+  children?: PortableTextSpan[];
+  asset?: { _ref?: string; _type?: string };
+  alt?: string;
+}
+
+const sanityBodyBlocks = Array.isArray(sanityPost?.body)
+  ? (sanityPost.body as PortableTextBlock[])
+  : [];
+
+function getBlockText(block: PortableTextBlock): string {
+  return (block.children || []).map((c) => c.text || '').join('');
+}
 ---
 <BaseLayout
   title={seoTitle}
@@ -180,7 +203,49 @@ const relatedLocalPosts = localBlogPosts.filter((p) => p.slug !== slug).slice(0,
             </div>
           )}
 
-          {localPost ? (
+          {sanityBodyBlocks.length > 0 ? (
+            <div class="space-y-4">
+              {sanityBodyBlocks.map((block) => {
+                if (block._type === 'image' && block.asset?._ref) {
+                  return (
+                    <div class="my-4 overflow-hidden rounded-2xl border border-brand-200/70 bg-white p-1.5">
+                      <img
+                        src={sanityImageUrl(block as unknown as Parameters<typeof sanityImageUrl>[0], { width: 800, format: 'webp' })}
+                        alt={block.alt || title}
+                        width="800"
+                        height="450"
+                        loading="lazy"
+                        class="w-full h-auto rounded-xl object-cover"
+                      />
+                    </div>
+                  );
+                }
+                const text = getBlockText(block).trim();
+                if (!text) return null;
+                if (block.listItem === 'bullet') {
+                  return (
+                    <ul class="list-disc pl-5 text-brand-700">
+                      <li>{text}</li>
+                    </ul>
+                  );
+                }
+                if (block.style === 'h2') {
+                  return <h2 class="text-xl font-bold text-brand-900 pt-2">{text}</h2>;
+                }
+                if (block.style === 'h3') {
+                  return <h3 class="text-lg font-semibold text-brand-900 pt-1">{text}</h3>;
+                }
+                if (block.style === 'blockquote') {
+                  return (
+                    <blockquote class="rounded-2xl border border-amber-400/40 bg-amber-50/70 p-4 text-sm text-brand-900 leading-relaxed">
+                      {text}
+                    </blockquote>
+                  );
+                }
+                return <p class="text-base text-brand-700 leading-relaxed">{text}</p>;
+              })}
+            </div>
+          ) : localPost ? (
             <>
               {localPost.sections.map((section) => (
                 <section class="space-y-3">
@@ -211,9 +276,7 @@ const relatedLocalPosts = localBlogPosts.filter((p) => p.slug !== slug).slice(0,
               )}
             </>
           ) : (
-            <p class="text-brand-400 text-sm italic border border-brand-100 rounded p-4">
-              [Article body — configure PortableText renderer to display rich text from Sanity]
-            </p>
+            <p class="text-brand-500 text-sm">No article content available yet.</p>
           )}
         </div>
 

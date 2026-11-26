@@ -1,3 +1,5 @@
+Contact: mailto:hello@epso.in
+Contact: mailto:contact@epso.in
 Contact: https://epso.in/contact/
 Contact: tel:+919809665188
 Preferred-Languages: en, ml

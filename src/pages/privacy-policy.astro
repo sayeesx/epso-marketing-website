@@ -1,6 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PhosphorIcon from '../components/ui/PhosphorIcon.astro';
+import Breadcrumbs from '../components/seo/Breadcrumbs.astro';
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Privacy Policy', href: '/privacy-policy/' },
+];
 ---
 <BaseLayout
   title="Privacy Policy"
@@ -9,32 +14,28 @@ import PhosphorIcon from '../components/ui/PhosphorIcon.astro';
 >
   <div class="section-pad">
     <div class="container-site mx-auto max-w-3xl">
+      <Breadcrumbs items={breadcrumbs} />
       <h1 class="mb-6 text-brand-800">Privacy policy</h1>
-      <div class="glass-panel border-amber-500/25 bg-amber-500/10 p-5 mb-8">
-        <p class="text-sm text-amber-900 font-medium flex items-center gap-2">
-          <PhosphorIcon name="note-pencil" size={18} class="text-amber-800 flex-shrink-0" />
-          <span>Placeholder. Replace with your actual privacy policy before launch. Have it reviewed by a legal professional.</span>
-        </p>
-      </div>
       <div class="space-y-5 text-brand-600">
         <p>
-          This website is operated by Epso. We respect your privacy and are committed to protecting your personal information.
+          This website is operated by Epso Marketing (EPSO BAKERY &amp; STATIONERY WHOLESALE, Cherukulamba, Malappuram district, Kerala). We respect your privacy and are committed to protecting your personal information.
         </p>
         <h2 class="text-brand-800">What information we collect</h2>
         <p>
-          We may collect information you provide when you use our contact form, such as your name, phone number and email address.
+          When you contact us directly by email, phone, or WhatsApp, we use the contact details and enquiry information you share solely to respond to your request.
         </p>
         <h2 class="text-brand-800">How we use your information</h2>
         <p>
-          We use the information you provide to respond to your enquiries. We do not sell or share your information with third parties.
+          We use the information you provide to respond to retail, wholesale, or product enquiries. We do not sell or share your information with third parties.
         </p>
         <h2 class="text-brand-800">Contact</h2>
         <p>
-          If you have questions about this privacy policy, please{' '}
-          <a href="/contact/" class="text-accent-600 hover:underline">contact us</a>.
+          If you have questions about this privacy policy, email us at{' '}
+          <a href="mailto:hello@epso.in" class="text-accent-600 hover:underline">hello@epso.in</a> or{' '}
+          <a href="mailto:contact@epso.in" class="text-accent-600 hover:underline">contact@epso.in</a>, or visit our{' '}
+          <a href="/contact/" class="text-accent-600 hover:underline">contact page</a>.
         </p>
       </div>
     </div>
   </div>
 </BaseLayout>
-

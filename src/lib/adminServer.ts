@@ -1,3 +1,5 @@
+import { localBlogPosts } from '../data/blogPosts';
+
 export interface AdminEnv {
   SANITY_PROJECT_ID?: string;
   SANITY_DATASET?: string;
@@ -234,7 +236,7 @@ export async function handleAdminRequest(request: Request, env: AdminEnv): Promi
     }
 
     if (request.method === 'GET' && action === 'data') {
-      const [categories, products] = await Promise.all([
+      const [categories, products, blogPosts] = await Promise.all([
         sanityFetch(cfg, `*[_type == "category"] | order(name asc) { _id, name, "slug": slug.current }`),
         sanityFetch(
           cfg,
@@ -255,8 +257,26 @@ export async function handleAdminRequest(request: Request, env: AdminEnv): Promi
             usageInstructions
           }`
         ),
+        sanityFetch(
+          cfg,
+          `*[_type == "blogPost"] | order(publishedAt desc, _createdAt desc) {
+            _id,
+            title,
+            slug,
+            publishedAt,
+            excerpt,
+            body,
+            mainImage,
+            "imageUrl": mainImage.asset->url,
+            seo
+          }`
+        ),
       ]);
-      return json({ categories: categories || [], products: products || [] });
+      return json({
+        categories: categories || [],
+        products: products || [],
+        blogPosts: blogPosts || [],
+      });
     }
 
     if (request.method === 'POST' && action === 'upload') {
@@ -318,6 +338,104 @@ export async function handleAdminRequest(request: Request, env: AdminEnv): Promi
       if (!body.id) return json({ error: 'Missing product ID.' }, 400);
       await sanityMutate(cfg, [{ delete: { id: body.id } }]);
       return json({ ok: true });
+    }
+
+    if (request.method === 'POST' && action === 'saveBlog') {
+      const body = (await request.json()) as {
+        editingId?: string;
+        payload?: Record<string, unknown>;
+      };
+      if (!body.payload) return json({ error: 'Missing blog post payload.' }, 400);
+
+      if (body.editingId) {
+        await sanityMutate(cfg, [{ patch: { id: body.editingId, set: body.payload } }]);
+      } else {
+        await sanityMutate(cfg, [{ create: { _type: 'blogPost', ...body.payload } }]);
+      }
+      return json({ ok: true });
+    }
+
+    if (request.method === 'POST' && action === 'deleteBlog') {
+      const body = (await request.json()) as { id?: string };
+      if (!body.id) return json({ error: 'Missing blog post ID.' }, 400);
+      await sanityMutate(cfg, [{ delete: { id: body.id } }]);
+      return json({ ok: true });
+    }
+
+    if (request.method === 'POST' && action === 'importDefaultBlogs') {
+      const existing = (await sanityFetch(
+        cfg,
+        `*[_type == "blogPost"] { "slug": slug.current }`
+      )) as Array<{ slug?: string }>;
+      const existingSlugs = new Set((existing || []).map((b) => b.slug).filter(Boolean));
+      const key = (prefix: string, idx: number) => `${prefix}${idx}${Math.random().toString(36).slice(2, 6)}`;
+
+      const mutations = localBlogPosts
+        .filter((post) => !existingSlugs.has(post.slug))
+        .map((post) => {
+          const blocks: Array<Record<string, unknown>> = [];
+          let idx = 0;
+
+          if (post.quickAnswer) {
+            blocks.push({
+              _type: 'block',
+              _key: key('qa', idx++),
+              style: 'blockquote',
+              markDefs: [],
+              children: [{ _type: 'span', _key: key('s', idx++), text: post.quickAnswer, marks: [] }],
+            });
+          }
+
+          for (const sec of post.sections) {
+            blocks.push({
+              _type: 'block',
+              _key: key('h', idx++),
+              style: 'h2',
+              markDefs: [],
+              children: [{ _type: 'span', _key: key('s', idx++), text: sec.heading, marks: [] }],
+            });
+            for (const p of sec.paragraphs) {
+              blocks.push({
+                _type: 'block',
+                _key: key('p', idx++),
+                style: 'normal',
+                markDefs: [],
+                children: [{ _type: 'span', _key: key('s', idx++), text: p, marks: [] }],
+              });
+            }
+            for (const b of sec.bullets || []) {
+              blocks.push({
+                _type: 'block',
+                _key: key('b', idx++),
+                style: 'normal',
+                listItem: 'bullet',
+                level: 1,
+                markDefs: [],
+                children: [{ _type: 'span', _key: key('s', idx++), text: b, marks: [] }],
+              });
+            }
+          }
+
+          return {
+            create: {
+              _type: 'blogPost',
+              title: post.title,
+              slug: { _type: 'slug', current: post.slug },
+              publishedAt: `${post.publishedAt}T09:00:00.000Z`,
+              excerpt: post.excerpt,
+              body: blocks,
+              seo: {
+                title: post.seoTitle.slice(0, 60),
+                description: post.description.slice(0, 160),
+              },
+            },
+          };
+        });
+
+      if (mutations.length > 0) {
+        await sanityMutate(cfg, mutations);
+      }
+      return json({ ok: true, created: mutations.length });
     }
 
     if (request.method === 'POST' && action === 'ensureCategories') {

@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from '../components/seo/Breadcrumbs.astro';
-import PhosphorIcon from '../components/ui/PhosphorIcon.astro';
 
 const breadcrumbs = [
   { label: 'Home', href: '/' },
@@ -17,41 +16,35 @@ const breadcrumbs = [
       <Breadcrumbs items={breadcrumbs} />
       <h1 class="mb-6 text-brand-800">Quality and standards</h1>
 
-      <div class="glass-panel border-amber-500/25 bg-amber-500/10 p-5 mb-8">
-        <p class="text-sm text-amber-900 font-medium flex items-center gap-2">
-          <PhosphorIcon name="note-pencil" size={18} class="text-amber-800 flex-shrink-0" />
-          <span>Placeholder content. Update with actual quality certifications, standards and manufacturing details once available.</span>
-        </p>
-      </div>
-
       <div class="space-y-6 text-brand-700 leading-relaxed">
         <p class="text-lg text-brand-900">
-          At Epso, we care about the quality of every product we make. This page will describe our quality standards and processes in detail.
+          At Epso, we care about the consistency and reliability of every product we supply from Cherukulamba, Malappuram district, Kerala.
         </p>
 
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div class="glass-panel p-6">
             <h2 class="mb-2 text-lg font-bold text-brand-900">Food products</h2>
             <p class="text-sm text-brand-600 leading-relaxed">
-              Details about food safety, ingredients and production standards — coming soon.
+              Our Kerala mixtures, tea-time snacks, and biscuits are packed in clean, sealed packs designed to preserve freshness for everyday family use.
             </p>
           </div>
           <div class="glass-panel p-6">
             <h2 class="mb-2 text-lg font-bold text-brand-900">Home care products</h2>
             <p class="text-sm text-brand-600 leading-relaxed">
-              Details about cleaning product safety, ingredients and standards — coming soon.
+              Our dishwashing liquids, floor cleaners, and household cleaning products undergo batch checks and hygienic packing before reaching retailers and homes.
             </p>
           </div>
         </div>
 
         <div class="glass-panel p-6">
-          <h2 class="mb-3 font-bold text-brand-900 text-lg">Certifications</h2>
+          <h2 class="mb-3 font-bold text-brand-900 text-lg">Quality checks &amp; enquiries</h2>
           <p class="text-sm text-brand-600 leading-relaxed">
-            Certification details will be listed here once confirmed.
+            Every batch supplied through EPSO BAKERY &amp; STATIONERY WHOLESALE is checked before packing and dispatch. For product specifications or wholesale documentation, contact{' '}
+            <a href="mailto:hello@epso.in" class="font-semibold text-brand-900 hover:underline">hello@epso.in</a> or{' '}
+            <a href="mailto:sales@epso.in" class="font-semibold text-brand-900 hover:underline">sales@epso.in</a>.
           </p>
         </div>
       </div>
     </div>
   </div>
 </BaseLayout>
-
