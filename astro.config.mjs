@@ -21,7 +21,7 @@ function readLocalEnv() {
 }
 
 export default defineConfig({
-  site: 'https://www.epso.in',
+  site: 'https://epso.in',
   integrations: [
     tailwind({
       applyBaseStyles: false,
@@ -34,7 +34,7 @@ export default defineConfig({
         !page.includes('/404'),
       serialize(item) {
         const url = item.url;
-        if (url === 'https://www.epso.in/' || url === 'https://epso.in/') {
+        if (url === 'https://epso.in/' || url === 'https://epso.in') {
           return { ...item, changefreq: 'weekly', priority: 1.0, lastmod: new Date().toISOString() };
         }
         if (url.includes('/products/') || url.includes('/blog/')) {

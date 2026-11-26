@@ -1,6 +1,6 @@
-Contact: https://www.epso.in/contact/
+Contact: https://epso.in/contact/
 Contact: tel:+919809665188
 Preferred-Languages: en, ml
-Canonical: https://www.epso.in/.well-known/security.txt
+Canonical: https://epso.in/.well-known/security.txt
 Expires: 2027-11-26T18:30:00.000Z
 

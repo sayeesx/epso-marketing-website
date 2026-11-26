@@ -87,6 +87,6 @@ User-agent: Yandex
 Allow: /
 
 # Sitemaps & AI Knowledge Files
-Sitemap: https://www.epso.in/sitemap-index.xml
-Sitemap: https://www.epso.in/image-sitemap.xml
-# LLMs / AEO / GEO index: https://www.epso.in/llms.txt
+Sitemap: https://epso.in/sitemap-index.xml
+Sitemap: https://epso.in/image-sitemap.xml
+# LLMs / AEO / GEO index: https://epso.in/llms.txt

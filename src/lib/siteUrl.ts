@@ -6,11 +6,11 @@
 export function getSiteUrl(astroSite?: URL): string {
   const envUrl = import.meta.env.SITE_URL;
   if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
-    return envUrl.replace(/\/$/, '');
+    return envUrl.replace('://www.epso.in', '://epso.in').replace(/\/$/, '');
   }
   if (astroSite) {
     return astroSite.toString().replace(/\/$/, '');
   }
-  return 'https://www.epso.in';
+  return 'https://epso.in';
 }
 
